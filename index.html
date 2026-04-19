@@ -1,62 +1,823 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FNAF Clicker</title>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=VT323&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#060008;--panel:#0a0012;--panel2:#0e0018;
+  --border:#6b0000;--accent:#ff1a1a;--gold:#ffc200;
+  --text:#ffaaaa;--dim:#551111;--green:#00ff41;
+  --purple:#8b00ff;--blue:#004dff;
+}
+body{background:var(--bg);color:var(--text);font-family:'VT323',monospace;font-size:17px;min-height:100vh;overflow-x:hidden;user-select:none;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,#1a000a 0%,#060008 70%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:9999;}
 
+/* TICKER */
+#ticker-wrap{position:relative;z-index:10;background:#0a0000;border-bottom:2px solid var(--border);padding:6px 0;overflow:hidden;}
+#ticker{white-space:nowrap;animation:tickerMove 30s linear infinite;display:inline-block;font-family:'Creepster',cursive;font-size:16px;color:var(--accent);}
+@keyframes tickerMove{0%{transform:translateX(100vw);}100%{transform:translateX(-100%)}}
 
-<!-- Ultimate Game Stash file--> 
-<!-- For the regularly updating doc go to https://docs.google.com/document/d/1_FmH3BlSBQI7FGgAQL59-ZPe8eCxs35wel6JUyVaG8Q/ -->
+/* HEADER */
+#header{position:relative;z-index:10;text-align:center;padding:10px;background:linear-gradient(180deg,#1a0005,transparent);border-bottom:1px solid #3a0000;}
+#header h1{font-family:'Creepster',cursive;font-size:48px;color:var(--accent);text-shadow:0 0 20px #ff0000,0 0 40px #ff000080;letter-spacing:4px;animation:flicker 4s infinite;}
+#header h1 span{color:var(--gold);}
+@keyframes flicker{0%,95%,100%{opacity:1;}96%,99%{opacity:0.3;}}
 
+/* LAYOUT */
+#game{display:grid;grid-template-columns:1fr 320px 380px;gap:0;position:relative;z-index:10;height:calc(100vh - 110px);overflow:hidden;}
 
+/* LEFT PANEL - STATS + CLICKER */
+#left-panel{border-right:2px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:15px;overflow-y:auto;overflow-x:hidden;background:linear-gradient(180deg,#0d0015,#060008);min-height:0;}
 
-<html lang="en-us">
-  <head>
-    <base href="https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@main/rocket%20soccer%20derby/">
-    <meta charset="utf-8">
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+#stats{width:100%;background:var(--panel2);border:1px solid var(--border);padding:10px;margin-bottom:12px;border-radius:4px;}
+#stats .stat{display:flex;justify-content:space-between;padding:2px 0;}
+#stats .stat span{color:var(--green);font-size:20px;}
+#stats .label{color:#ff8888;}
 
-  <title>Rocket Soccer </title>
-  <meta name="robots" content="noindex,nofollow" />
-  	            <script> 
-      window.fileMergerConfig = {
-        files: [
-          { name: 'RSD 1.1.0rc4.data.unityweb', parts: 2 },
-          { name: 'RSD 1.1.0rc4.wasm.code.unityweb', parts: 2 },
-          { name: 'RSD 1.1.0rc4.wasm.framework.unityweb', parts: 1 },
-        ],
-        basePath: 'Build/',
-        debug: true
-      };  
-  </script>
-  <script src="https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@main/merge.js"></script>
-  <script>
-    window.config = {
-      loader: 'unity',
-      debug: false,
-      maxRatio: 16 / 9,
-      minRatio: 9 / 16,
+#phase-title{font-family:'Creepster',cursive;font-size:22px;color:var(--gold);text-align:center;margin-bottom:8px;text-shadow:0 0 10px var(--gold);}
 
-      title: 'Rocket Soccer',
+/* CLICKER */
+#clicker-area{position:relative;cursor:pointer;margin:10px 0;}
+#clicker-btn{width:240px;height:240px;border-radius:50%;border:4px solid var(--border);background:radial-gradient(circle,#1a000a,#060008);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .08s,box-shadow .08s;box-shadow:0 0 30px #ff000040,inset 0 0 40px #1a0005;position:relative;overflow:hidden;}
+#clicker-btn:hover{box-shadow:0 0 50px #ff000070,inset 0 0 40px #2a0010;}
+#clicker-btn:active{transform:scale(0.92);box-shadow:0 0 80px #ff0000aa;}
+#clicker-btn .char-emoji{font-size:90px;line-height:1;filter:drop-shadow(0 0 15px #ff000080);}
+#clicker-btn .char-name{font-family:'Creepster',cursive;font-size:16px;color:var(--accent);margin-top:4px;}
+#clicker-btn::after{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.05),transparent 60%);pointer-events:none;}
 
-      thumbnail: 'e521bbbf13a6480b60d75421e7edc8d8d0e1edadaccd7d43438864b62a74088a.png',
-      numScreenshots: 4,
+#golden-freddy-overlay{display:none;position:fixed;inset:0;background:#000;z-index:10000;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;}
+#golden-freddy-overlay.show{display:flex;}
+#golden-freddy-overlay .gf-char{font-size:200px;animation:gfPulse .5s infinite alternate;}
+#golden-freddy-overlay p{font-family:'Creepster',cursive;font-size:48px;color:var(--gold);margin-top:20px;}
+#golden-freddy-overlay p.sub{font-size:24px;color:var(--accent);margin-top:10px;}
+@keyframes gfPulse{0%{filter:brightness(0.5) sepia(1) hue-rotate(30deg);transform:scale(0.95);}100%{filter:brightness(1.5) sepia(1) hue-rotate(50deg);transform:scale(1.05);}}
 
-      unityWebglBuildUrl: 'Build/RSD 1.1.0rc4.json',
-      unityWebglLoaderUrl: 'UnityLoader.js',
+#click-info{font-size:20px;color:#ff7777;margin-top:8px;}
+#progress-bar-wrap{width:100%;margin-top:10px;}
+#progress-bar-wrap label{font-size:16px;color:#aa6666;}
+#progress-bar{width:100%;height:12px;background:#1a0008;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-top:4px;}
+#progress-fill{height:100%;background:linear-gradient(90deg,#8b0000,var(--accent));transition:width .3s;border-radius:6px;}
 
-      // **** Optional Settings ****
-      fileSize: 27,
-      loadingComments: ['Loading...'],
-      cachedDecompressedFileSizes: {
-        'RSD 1.1.0rc4.wasm.framework.unityweb': 538308,
-        'RSD 1.1.0rc4.wasm.code.unityweb': 26620102,
-        'RSD 1.1.0rc4.data.unityweb': 29723236,
-      },
-      //
-    };
-  </script>
+/* MIDDLE PANEL - SHOP */
+#middle-panel{border-right:2px solid var(--border);display:flex;flex-direction:column;background:var(--panel);min-height:0;}
+#shop-tabs{display:flex;border-bottom:2px solid var(--border);flex-shrink:0;}
+.shop-tab{flex:1;padding:10px 5px;text-align:center;cursor:pointer;font-family:'Creepster',cursive;font-size:18px;color:var(--dim);border:none;background:transparent;transition:all .2s;}
+.shop-tab:hover{color:var(--text);background:#0d0015;}
+.shop-tab.active{color:var(--gold);background:#0d0015;border-bottom:3px solid var(--gold);}
+#shop-content{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px;min-height:0;}
+#shop-content::-webkit-scrollbar{width:6px;}
+#shop-content::-webkit-scrollbar-track{background:#0a0010;}
+#shop-content::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* UPGRADES */
+.upgrade-item{display:flex;align-items:center;gap:8px;padding:8px;margin-bottom:6px;background:#0e0018;border:1px solid #3a0030;border-radius:4px;cursor:pointer;transition:all .2s;}
+.upgrade-item:hover:not(.bought):not(.locked){border-color:var(--accent);background:#18001a;}
+.upgrade-item.bought{opacity:0.4;border-color:#222;cursor:default;}
+.upgrade-item.locked{opacity:0.3;cursor:not-allowed;filter:grayscale(0.8);}
+.upgrade-item.affordable{border-color:#ff6600;box-shadow:0 0 8px #ff660040;}
+.upgrade-icon{font-size:28px;min-width:36px;text-align:center;}
+.upgrade-info .uname{font-family:'Creepster',cursive;font-size:18px;color:#ffcccc;}
+.upgrade-info .udesc{font-size:14px;color:#aa6666;}
+.upgrade-info .ucost{font-size:15px;color:var(--gold);}
+
+/* BUILDINGS */
+.building-item{padding:8px;margin-bottom:8px;background:#0e0015;border:1px solid #3a0020;border-radius:4px;cursor:pointer;transition:all .2s;}
+.building-item:hover:not(.locked){border-color:var(--accent);background:#150010;}
+.building-item.locked{opacity:0.35;cursor:not-allowed;}
+.building-item.affordable{border-color:#ff6600;box-shadow:0 0 8px #ff660040;}
+.building-header{display:flex;align-items:center;gap:8px;justify-content:space-between;}
+.building-left{display:flex;align-items:center;gap:8px;}
+.building-icon{font-size:26px;}
+.building-name{font-family:'Creepster',cursive;font-size:19px;color:#ffcccc;}
+.building-count{font-size:22px;color:var(--green);min-width:40px;text-align:right;}
+.building-desc{font-size:14px;color:#aa6666;margin-top:3px;}
+.building-cost{font-size:15px;color:var(--gold);}
+.building-prod{font-size:14px;color:#88cc88;}
+
+/* CHARACTERS */
+#chars-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px;}
+.char-card{background:#0e0018;border:1px solid #3a0028;border-radius:6px;padding:8px;text-align:center;transition:all .2s;}
+.char-card.unlocked{border-color:#8b0050;box-shadow:0 0 10px #8b005040;}
+.char-card.locked{opacity:0.25;filter:grayscale(1);}
+.char-card .cc-emoji{font-size:36px;display:block;margin-bottom:4px;}
+.char-card .cc-name{font-family:'Creepster',cursive;font-size:16px;color:#ffcccc;}
+.char-card .cc-game{font-size:12px;color:#886666;}
+.char-card .cc-lore{font-size:12px;color:#aa7777;margin-top:4px;line-height:1.3;}
+
+/* RIGHT PANEL - STORY/LOG */
+#right-panel{display:flex;flex-direction:column;background:linear-gradient(180deg,#080012,#060008);min-height:0;}
+#right-panel h2{font-family:'Creepster',cursive;font-size:24px;color:var(--accent);padding:10px 15px;border-bottom:2px solid var(--border);text-align:center;}
+#story-log{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:0;}
+#story-log::-webkit-scrollbar{width:6px;}
+#story-log::-webkit-scrollbar-track{background:#0a0010;}
+#story-log::-webkit-scrollbar-thumb{background:var(--border);}
+.log-entry{background:#0d0018;border-left:3px solid var(--border);padding:8px 10px;border-radius:0 4px 4px 0;animation:logIn .4s ease;}
+.log-entry.lore{border-left-color:var(--gold);}
+.log-entry.unlock{border-left-color:#00ff88;}
+.log-entry .log-title{font-family:'Creepster',cursive;font-size:17px;margin-bottom:3px;}
+.log-entry.lore .log-title{color:var(--gold);}
+.log-entry.unlock .log-title{color:#00ff88;}
+.log-entry .log-body{font-size:14px;color:#cc8888;line-height:1.4;}
+@keyframes logIn{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:translateX(0);}}
+
+#achievements-bar{border-top:2px solid var(--border);padding:8px 12px;background:#0a0010;}
+#achievements-bar h3{font-family:'Creepster',cursive;font-size:18px;color:var(--gold);margin-bottom:6px;}
+#ach-list{display:flex;flex-wrap:wrap;gap:6px;}
+.ach-badge{background:#1a0010;border:1px solid #5a0030;border-radius:4px;padding:4px 8px;font-size:14px;color:#cc9999;transition:all .3s;}
+.ach-badge.earned{border-color:var(--gold);color:var(--gold);box-shadow:0 0 8px #ffc20040;}
+
+/* POPUP MODAL */
+#modal{display:none;position:fixed;inset:0;background:#000000cc;z-index:5000;align-items:center;justify-content:center;}
+#modal.show{display:flex;}
+#modal-box{background:#0a0015;border:3px solid var(--border);border-radius:8px;padding:30px;max-width:480px;width:90%;text-align:center;box-shadow:0 0 60px #ff000050;animation:modalIn .3s ease;}
+@keyframes modalIn{from{transform:scale(0.8);opacity:0;}to{transform:scale(1);opacity:1;}}
+#modal-box .modal-emoji{font-size:80px;display:block;margin-bottom:15px;}
+#modal-box h2{font-family:'Creepster',cursive;font-size:32px;color:var(--gold);margin-bottom:10px;}
+#modal-box p{color:#cc9999;font-size:18px;line-height:1.5;margin-bottom:20px;}
+#modal-box button{background:#3a0000;border:2px solid var(--accent);color:var(--accent);font-family:'Creepster',cursive;font-size:22px;padding:10px 30px;cursor:pointer;border-radius:4px;transition:all .2s;}
+#modal-box button:hover{background:#600000;box-shadow:0 0 20px #ff000060;}
+
+/* FLOATING NUMBERS */
+.float-num{position:fixed;font-family:'Creepster',cursive;font-size:22px;color:var(--gold);pointer-events:none;z-index:8000;animation:floatUp 1s ease forwards;}
+.float-num.red{color:var(--accent);}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-80px);}}
+
+/* SECTION HEADERS */
+.section-header{font-family:'Creepster',cursive;font-size:20px;color:var(--accent);padding:6px 0;margin-bottom:8px;border-bottom:1px solid #3a0020;}
+
+/* Number format */
+.big-num{font-size:26px;color:var(--green);font-family:'VT323',monospace;}
+
+/* Scrollbar global */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:#0a0010;}
+::-webkit-scrollbar-thumb{background:#4a0020;}
+
+/* Glow pulse on clicker */
+@keyframes borderPulse{0%,100%{box-shadow:0 0 30px #ff000040,inset 0 0 40px #1a0005;}50%{box-shadow:0 0 60px #ff000070,inset 0 0 60px #2a0010;}}
+#clicker-btn{animation:borderPulse 3s ease-in-out infinite;}
+
+/* Mobile */
+@media(max-width:900px){
+  #game{grid-template-columns:1fr 1fr;grid-template-rows:auto auto;height:auto;}
+  #right-panel{grid-column:1/-1;}
+  #clicker-btn{width:180px;height:180px;}
+  #clicker-btn .char-emoji{font-size:70px;}
+  #header h1{font-size:32px;}
+}
+@media(max-width:600px){
+  #game{grid-template-columns:1fr;height:auto;}
+  #middle-panel,#right-panel{border:none;border-top:2px solid var(--border);}
+}
+</style>
 </head>
-
 <body>
-  <!-- <script src="https://game-cdn.poki.com/loaders/v2/master-loader.js"></script> -->
-  <script src="master-loader.js"></script>
-</body>
 
+<div id="ticker-wrap"><span id="ticker">★ FNAF CLICKER ★ Five Nights at Freddy's Clicker ★ Beware of the animatronics ★ He's watching... ★ The show starts at midnight ★ It's Me... ★ Can you survive? ★ FNAF CLICKER ★</span></div>
+
+<div id="header"><h1>🎪 FNAF <span>CLICKER</span> 🎪</h1></div>
+
+<div id="game">
+  <!-- LEFT -->
+  <div id="left-panel">
+    <div id="stats">
+      <div class="stat"><span class="label">🪙 FAZ TOKENS:</span><span id="stat-tokens" class="big-num">0</span></div>
+      <div class="stat"><span class="label">⚡ PER SECOND:</span><span id="stat-tps">0/s</span></div>
+      <div class="stat"><span class="label">👆 PER CLICK:</span><span id="stat-tpc">1</span></div>
+      <div class="stat"><span class="label">📊 ALL TIME:</span><span id="stat-total">0</span></div>
+      <div class="stat"><span class="label">🖱️ CLICKS:</span><span id="stat-clicks">0</span></div>
+    </div>
+
+    <div id="phase-title">⭐ Five Nights at Freddy's ⭐</div>
+
+    <div id="clicker-area">
+      <div id="clicker-btn" onclick="doClick(event)">
+        <div class="char-emoji" id="clicker-emoji">🐻</div>
+        <div class="char-name" id="clicker-char-name">FREDDY FAZBEAR</div>
+      </div>
+    </div>
+
+    <div id="click-info">Click to collect Faz Tokens!</div>
+
+    <div id="progress-bar-wrap">
+      <label id="progress-label">Next: Freddy Fazbear's Pizza (10 tokens)</label>
+      <div id="progress-bar"><div id="progress-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- MIDDLE - SHOP -->
+  <div id="middle-panel">
+    <div id="shop-tabs">
+      <button class="shop-tab active" onclick="switchTab('upgrades')">⬆ Upgrades</button>
+      <button class="shop-tab" onclick="switchTab('buildings')">🏚 Places</button>
+      <button class="shop-tab" onclick="switchTab('characters')">👾 Characters</button>
+    </div>
+    <div id="shop-content">
+      <div id="tab-upgrades"></div>
+      <div id="tab-buildings" style="display:none"></div>
+      <div id="tab-characters" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT - STORY LOG -->
+  <div id="right-panel">
+    <h2>📼 FNAF CASE FILES</h2>
+    <div id="story-log">
+      <div class="log-entry">
+        <div class="log-title">🌑 It Begins...</div>
+        <div class="log-body">You are the new security guard at Freddy Fazbear's Pizza. Your job is simple: survive from midnight to 6 AM. Click Freddy to earn Faz Tokens and uncover the dark history of the Fazbear Entertainment empire...</div>
+      </div>
+    </div>
+    <div id="achievements-bar">
+      <h3>🏆 Achievements</h3>
+      <div id="ach-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- GOLDEN FREDDY OVERLAY -->
+<div id="golden-freddy-overlay" onclick="dismissGoldenFreddy()">
+  <div class="gf-char">👻</div>
+  <p>IT'S ME</p>
+  <p class="sub">+<span id="gf-bonus"></span> Faz Tokens! (Click to dismiss)</p>
+</div>
+
+<!-- MODAL -->
+<div id="modal" onclick="closeModal()">
+  <div id="modal-box" onclick="event.stopPropagation()">
+    <span class="modal-emoji" id="modal-emoji">🎪</span>
+    <h2 id="modal-title">Title</h2>
+    <p id="modal-body">Body</p>
+    <button onclick="closeModal()">CONTINUE ▶</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//   GAME DATA
+// ═══════════════════════════════════════════════
+
+const BUILDINGS = [
+  {id:'pizza1', name:"Freddy Fazbear's Pizza", icon:"🍕", desc:"The original haunted restaurant. Something feels off.", baseCost:15, baseProduction:0.1},
+  {id:'office', name:"Security Office", icon:"📹", desc:"Watch the cameras. Keep the power on. Don't let them in.", baseCost:100, baseProduction:0.5},
+  {id:'partservice', name:"Parts & Service Room", icon:"🔧", desc:"Animatronics get 'repaired' here. Don't ask what's inside.", baseCost:1100, baseProduction:4},
+  {id:'piratecove', name:"Pirate's Cove", icon:"⚓", desc:"Foxy lurks behind the curtain. He's checking if you're watching.", baseCost:12000, baseProduction:20},
+  {id:'prizecorner', name:"Prize Corner", icon:"🎁", desc:"Keep winding the music box. Whatever you do — don't stop.", baseCost:130000, baseProduction:100},
+  {id:'sisterloc', name:"Sister Location", icon:"🤖", desc:"You have chosen, or been chosen, to fulfil your service here.", baseCost:1400000, baseProduction:400},
+  {id:'fright', name:"Fazbear's Fright", icon:"🎃", desc:"A horror attraction built on real tragedy. Something survived.", baseCost:20000000, baseProduction:1600},
+  {id:'bedroom', name:"The Bedroom", icon:"🛏️", desc:"Something is under your bed. Don't let the light die.", baseCost:330000000, baseProduction:6500},
+  {id:'cbpw', name:"Circus Baby's Pizza World", icon:"🎪", desc:"Do you want to go somewhere fun? I want to show you something.", baseCost:5100000000, baseProduction:26000},
+  {id:'pizzaplex', name:"Mega Pizzaplex", icon:"🏟️", desc:"Freddy Fazbear's Mega Pizzaplex. Biggest and brightest — but who's really in control?", baseCost:75000000000, baseProduction:100000},
+];
+
+const UPGRADES = [
+  // Click upgrades
+  {id:'u1', name:"Fazbear Endoskeleton", icon:"🦴", desc:"+1 token per click", cost:10, type:'click', val:1},
+  {id:'u2', name:"Bear Claws", icon:"🐾", desc:"+3 tokens per click", cost:50, type:'click', val:3},
+  {id:'u3', name:"Freddy's Microphone", icon:"🎤", desc:"×2 tokens per click", cost:200, type:'clickmult', val:2},
+  {id:'u4', name:"Night Watch Salary", icon:"💰", desc:"+10 tokens per click", cost:1000, type:'click', val:10},
+  {id:'u5', name:"Jumpscare Training", icon:"😱", desc:"×2 tokens per click", cost:5000, type:'clickmult', val:2},
+  {id:'u6', name:"Golden Freddy Suit", icon:"⭐", desc:"+50 tokens per click", cost:25000, type:'click', val:50},
+  {id:'u7', name:"Shadow Freddy", icon:"🌑", desc:"×3 tokens per click", cost:150000, type:'clickmult', val:3},
+  {id:'u8', name:"Purple Guy's Wrench", icon:"🔧", desc:"+200 tokens per click", cost:800000, type:'click', val:200},
+  {id:'u9', name:"Nightmare Mode", icon:"😈", desc:"×5 tokens per click", cost:5000000, type:'clickmult', val:5},
+  {id:'u10', name:"Scooper Device", icon:"🥄", desc:"×10 tokens per click", cost:50000000, type:'clickmult', val:10},
+  {id:'u11', name:"Remnant Injection", icon:"💉", desc:"×25 tokens per click", cost:1000000000, type:'clickmult', val:25},
+  {id:'u12', name:"Glitchtrap Virus", icon:"🐛", desc:"×50 tokens per click", cost:50000000000, type:'clickmult', val:50},
+  // Building upgrades - pizza1
+  {id:'b1u1', name:"Better Animatronics", icon:"🎩", desc:"Freddy Fazbear's Pizza ×2 production", cost:100, type:'building', bid:'pizza1', val:2},
+  {id:'b1u2', name:"New Show Stage", icon:"🎭", desc:"Freddy Fazbear's Pizza ×2 production", cost:800, type:'building', bid:'pizza1', val:2},
+  {id:'b1u3', name:"Classic Location", icon:"🍕", desc:"Freddy Fazbear's Pizza ×5 production", cost:5000, type:'building', bid:'pizza1', val:5},
+  // Building upgrades - office
+  {id:'b2u1', name:"Improved Cameras", icon:"📷", desc:"Security Office ×2 production", cost:500, type:'building', bid:'office', val:2},
+  {id:'b2u2', name:"Backup Power", icon:"🔋", desc:"Security Office ×2 production", cost:4000, type:'building', bid:'office', val:2},
+  {id:'b2u3', name:"Steel Doors", icon:"🚪", desc:"Security Office ×5 production", cost:30000, type:'building', bid:'office', val:5},
+  // Building upgrades - partservice
+  {id:'b3u1', name:"Spare Parts Stockpile", icon:"⚙️", desc:"Parts & Service ×2 production", cost:6000, type:'building', bid:'partservice', val:2},
+  {id:'b3u2', name:"Endoskeleton Upgrade", icon:"🤖", desc:"Parts & Service ×3 production", cost:50000, type:'building', bid:'partservice', val:3},
+  // Building upgrades - piratecove
+  {id:'b4u1', name:"Torn Curtain", icon:"🎪", desc:"Pirate's Cove ×2 production", cost:60000, type:'building', bid:'piratecove', val:2},
+  {id:'b4u2', name:"Foxy Runs Free", icon:"🦊", desc:"Pirate's Cove ×5 production", cost:600000, type:'building', bid:'piratecove', val:5},
+  // Building upgrades - prizecorner
+  {id:'b5u1', name:"Music Box Wound", icon:"🎵", desc:"Prize Corner ×2 production", cost:700000, type:'building', bid:'prizecorner', val:2},
+  {id:'b5u2', name:"The Puppet Awakens", icon:"🎭", desc:"Prize Corner ×3 production", cost:7000000, type:'building', bid:'prizecorner', val:3},
+  // Building upgrades - sisterloc
+  {id:'b6u1', name:"HandUnit Protocols", icon:"🖐️", desc:"Sister Location ×2 production", cost:8000000, type:'building', bid:'sisterloc', val:2},
+  {id:'b6u2', name:"Scooper Activated", icon:"🥄", desc:"Sister Location ×5 production", cost:100000000, type:'building', bid:'sisterloc', val:5},
+  // Building upgrades - fright
+  {id:'b7u1', name:"Original Suit Found", icon:"🐰", desc:"Fazbear's Fright ×2 production", cost:120000000, type:'building', bid:'fright', val:2},
+  {id:'b7u2', name:"Springtrap Loose", icon:"💀", desc:"Fazbear's Fright ×5 production", cost:1500000000, type:'building', bid:'fright', val:5},
+  // bedroom
+  {id:'b8u1', name:"Nightlight Installed", icon:"💡", desc:"The Bedroom ×2 production", cost:2000000000, type:'building', bid:'bedroom', val:2},
+  // cbpw
+  {id:'b9u1', name:"Baby's Ice Cream", icon:"🍦", desc:"Circus Baby's Pizza World ×2 production", cost:30000000000, type:'building', bid:'cbpw', val:2},
+  // pizzaplex
+  {id:'b10u1', name:"Glamrock Band", icon:"🎸", desc:"Mega Pizzaplex ×2 production", cost:400000000000, type:'building', bid:'pizzaplex', val:2},
+];
+
+const CHARACTERS = [
+  // FNAF 1
+  {id:'freddy', name:"Freddy Fazbear", icon:"🐻", game:"FNAF 1", lore:"The face of Fazbear Entertainment. By night, he leads the animatronics on their... rounds.", unlock:0},
+  {id:'bonnie', name:"Bonnie", icon:"🎸", game:"FNAF 1", lore:"The purple bunny guitarist. He moves first. You'll notice the empty hallway before you notice him.", unlock:50},
+  {id:'chica', name:"Chica", icon:"🐤", game:"FNAF 1", lore:"The yellow chicken who loves pizza. She comes through the kitchen. Listen for the pots.", unlock:100},
+  {id:'foxy', name:"Foxy the Pirate", icon:"🦊", game:"FNAF 1", lore:"Retired to Pirate's Cove after an incident. If you don't watch him, he will run.", unlock:200},
+  {id:'goldenfreddy', name:"Golden Freddy", icon:"✨", game:"FNAF 1", lore:"An old, withered golden suit. His appearances are unexplained. Some say he is a ghost.", unlock:500},
+  // FNAF 2
+  {id:'toyfreddy', name:"Toy Freddy", icon:"🎪", game:"FNAF 2", lore:"The shiny new version of Freddy. Overconfident. Less threatening than the others.", unlock:1000},
+  {id:'toybonnie', name:"Toy Bonnie", icon:"🐰", game:"FNAF 2", lore:"Sleek blue guitar rabbit. Moves quickly through the vents.", unlock:1500},
+  {id:'toychica', name:"Toy Chica", icon:"🐔", game:"FNAF 2", lore:"The new Chica model. She removes her beak when she leaves the stage. Don't ask why.", unlock:2000},
+  {id:'mangle', name:"Mangle", icon:"🕸️", game:"FNAF 2", lore:"Pulled apart by kids too many times. Management calls it a 'work in progress'. It crawls through the vents.", unlock:3000},
+  {id:'bb', name:"Balloon Boy", icon:"🎈", game:"FNAF 2", lore:"HI! Hello! He steals your flashlight batteries. Harmless alone. Not harmless when you're left in the dark.", unlock:4000},
+  {id:'puppet', name:"The Marionette", icon:"🎭", game:"FNAF 2", lore:"The Puppet. It guards the Prize Corner. If the music box runs out... it will come. It gives life to the others.", unlock:5000},
+  {id:'witheredfreddy', name:"Withered Freddy", icon:"💀", game:"FNAF 2", lore:"The original animatronics, damaged and replaced. They were used as parts. Their eyes still move.", unlock:7000},
+  {id:'witheredbonnie', name:"Withered Bonnie", icon:"😶", game:"FNAF 2", lore:"His face is gone. Something is missing. Yet he still wanders.", unlock:8000},
+  {id:'jj', name:"JJ (Balloon Girl)", icon:"🎀", game:"FNAF 2", lore:"A hidden figure. Never acknowledged by management. She watches from behind the scenes.", unlock:10000},
+  // FNAF 3
+  {id:'springtrap', name:"Springtrap", icon:"☠️", game:"FNAF 3", lore:"William Afton, the Purple Guy, became trapped in a Spring Bonnie suit. The suit malfunctioned. He cannot die.", unlock:20000},
+  {id:'phantomfreddy', name:"Phantom Freddy", icon:"👁️", game:"FNAF 3", lore:"A hallucination of the old Freddy. He doesn't move. He just watches.", unlock:25000},
+  {id:'phantombb', name:"Phantom BB", icon:"💀", game:"FNAF 3", lore:"A burned, charred vision of Balloon Boy. Causes your ventilation to fail.", unlock:30000},
+  {id:'phantompuppet', name:"Phantom Marionette", icon:"🖤", game:"FNAF 3", lore:"The Puppet, scorched and broken. Appears in your office when the cameras cut out.", unlock:35000},
+  // FNAF 4
+  {id:'nightmarefreddy', name:"Nightmare Freddy", icon:"😱", game:"FNAF 4", lore:"A twisted nightmare vision of Freddy. The Freddles come first, then him.", unlock:50000},
+  {id:'nightmarebonnie', name:"Nightmare Bonnie", icon:"🐇", game:"FNAF 4", lore:"Massive. Sharp teeth. Lurks to the left of the bedroom door.", unlock:60000},
+  {id:'nightmarechica', name:"Nightmare Chica", icon:"🐣", game:"FNAF 4", lore:"The nightmare Chica hides in the closet. The sounds from the kitchen aren't the house settling.", unlock:70000},
+  {id:'nightmarefoxy', name:"Nightmare Foxy", icon:"🦴", game:"FNAF 4", lore:"Foxy, twisted into something savage. He hides in the closet and leaps.", unlock:80000},
+  {id:'nightmarefredbear', name:"Nightmare Fredbear", icon:"👑", game:"FNAF 4", lore:"The golden bear of nightmares. The one behind all of it. He bit the child.", unlock:100000},
+  {id:'nightmare', name:"NIGHTMARE", icon:"🌑", game:"FNAF 4", lore:"Pure shadow. Pure darkness. An entity born from deepest terror. Nothing more.", unlock:120000},
+  {id:'plushtrap', name:"Plushtrap", icon:"🧸", game:"FNAF 4", lore:"A small Spring Bonnie plushie that comes to life in a minigame. Cute. Very dangerous.", unlock:130000},
+  {id:'nightmarionne', name:"Nightmarionne", icon:"🎪", game:"FNAF 4 DLC", lore:"The Puppet, corrupted into a nightmare. Long black fingers. Empty white eyes.", unlock:150000},
+  // Sister Location
+  {id:'circusbaby', name:"Circus Baby", icon:"🤡", game:"Sister Location", lore:"Elizabeth Afton, scooped by Baby and kept inside. She leads the others. She knows more than she says.", unlock:200000},
+  {id:'funtimefreddy', name:"Funtime Freddy", icon:"🎠", game:"Sister Location", lore:"He has a hand puppet named Bon-Bon. He loves to perform. He also loves to capture.", unlock:250000},
+  {id:'funtimefoxy', name:"Funtime Foxy", icon:"🎀", game:"Sister Location", lore:"Pink and white. Performs in the Funtime Auditorium. You must not let it hear you.", unlock:300000},
+  {id:'ballora', name:"Ballora", icon:"💃", game:"Sister Location", lore:"She dances in the dark. Keep your eyes shut. She is attracted to sound.", unlock:350000},
+  {id:'ennard', name:"Ennard", icon:"🕸️", game:"Sister Location", lore:"The amalgamation. All the Funtime animatronics merged into one, hiding behind a mask. Baby controls it.", unlock:400000},
+  {id:'bidybab', name:"Bidybab", icon:"👶", game:"Sister Location", lore:"Small and childlike. They tap on the mini-game door. Don't let them in.", unlock:450000},
+  {id:'lolbit', name:"Lolbit", icon:"🦊", game:"Sister Location", lore:"A glitchy Funtime Foxy variant in orange and white. Appears to block your path.", unlock:500000},
+  // FFPS
+  {id:'scraptrap', name:"Scraptrap", icon:"🪤", game:"Pizzeria Simulator", lore:"William Afton survives again, in a new rotting rabbit suit. He always comes back.", unlock:700000},
+  {id:'scrapbaby', name:"Scrap Baby", icon:"⚙️", game:"Pizzeria Simulator", lore:"Circus Baby, rebuilt from scraps. More dangerous than ever. Still holding scissors.", unlock:800000},
+  {id:'moltenfreddy', name:"Molten Freddy", icon:"🔥", game:"Pizzeria Simulator", lore:"Ennard, after casting out Baby's control chip. A writhing mass of wires and parts.", unlock:900000},
+  {id:'lefty', name:"Lefty", icon:"🎸", game:"Pizzeria Simulator", lore:"A special animatronic built by Henry Emily to contain the Puppet — his daughter, Charlie.", unlock:1000000},
+  // UCN
+  {id:'mrhippo', name:"Mr. Hippo", icon:"🦛", game:"UCN", lore:"A jovial hippo who tells long stories while trying to end you. His tales have no point.", unlock:1500000},
+  {id:'happyfrog', name:"Happy Frog", icon:"🐸", game:"UCN", lore:"An exuberant green frog from the Mediocre Melodies. Don't let the happiness fool you.", unlock:1600000},
+  {id:'neddBear', name:"Nedd Bear", icon:"🐨", game:"UCN", lore:"A sarcastic bear-like animatronic. 'Figure it out, genius.'", unlock:1700000},
+  {id:'helpy', name:"Helpy", icon:"🐻", game:"UCN / FFPS", lore:"The cheerful mascot of Fazbear Entertainment. He tries to help. He often makes things worse.", unlock:2000000},
+  // Security Breach
+  {id:'glamrockfreddy', name:"Glamrock Freddy", icon:"🎸", game:"Security Breach", lore:"The star of the Mega Pizzaplex. He protects Gregory. Inside, a remnant of the old Freddy endures.", unlock:3000000},
+  {id:'glamrockchica', name:"Glamrock Chica", icon:"🎤", game:"Security Breach", lore:"Glam rock guitarist, corrupted by Vanny's programming. She searches the food court.", unlock:3500000},
+  {id:'roxannewolf', name:"Roxanne Wolf", icon:"🐺", game:"Security Breach", lore:"'I'm the best!' A vain green wolf who patrols the racetrack. Her eyes are enhanced.", unlock:4000000},
+  {id:'montgomerygator', name:"Montgomery Gator", icon:"🐊", game:"Security Breach", lore:"The cool sunglasses-wearing bassist. Aggressive. Hunts the Mini Golf area.", unlock:4500000},
+  {id:'djmusicman', name:"DJ Music Man", icon:"🎵", game:"Security Breach", lore:"A colossal DJ spider. Massive. Fills the entire atrium. The ground shakes when he moves.", unlock:5000000},
+  {id:'vanny', name:"Vanny", icon:"🐰", game:"Security Breach", lore:"The white rabbit. Vanessa under Glitchtrap's control. She hunts Gregory throughout the Pizzaplex.", unlock:6000000},
+  {id:'gregory', name:"Gregory", icon:"👦", game:"Security Breach", lore:"The child who hides inside Glamrock Freddy. He knows things he shouldn't. He came in before closing.", unlock:7000000},
+  // Special
+  {id:'williamafton', name:"William Afton", icon:"🟣", game:"All Games", lore:"THE PURPLE GUY. The killer behind everything. He murdered the Missing Children. He always comes back. 'I always come back.'", unlock:8000000},
+  {id:'henryemily', name:"Henry Emily", icon:"🔑", game:"FFPS / SL", lore:"William's old business partner. Father of Charlie (The Puppet). He built the Pizzeria as a trap — and burned it down.", unlock:9000000},
+  {id:'phoneguy', name:"Phone Guy", icon:"📞", game:"FNAF 1-2", lore:"He left you the training tapes. He was a security guard before you. He didn't make it to night 4.", unlock:10000000},
+  {id:'glitchtrap', name:"Glitchtrap", icon:"🐛", game:"Help Wanted", lore:"William Afton's consciousness, uploaded into a VR game. He corrupts the player. He escapes through them.", unlock:15000000},
+  {id:'springbonnie', name:"Spring Bonnie", icon:"💛", game:"FNAF 1-3", lore:"The original Spring Bonnie suit used by William Afton to lure children. Later became his prison.", unlock:20000000},
+];
+
+const LORE_EVENTS = [
+  {threshold:10, title:"The First Night", emoji:"📹", body:"Phone Guy left a message: 'Uh, hello? Hello hello? Uh, I wanted to record a message for you, to help you get settled in on your first night... the animatronics tend to wander at night.' You are not alone."},
+  {threshold:100, title:"Missing Children Incident", emoji:"🟣", body:"Five children went missing from the original Freddy Fazbear's Pizza in the 1980s. The murders were committed by a man in a yellow Freddy suit. The bodies were never found. The animatronics began to smell."},
+  {threshold:500, title:"The Bite of '87", emoji:"🦷", body:"During a birthday party, one of the animatronics bit a person's frontal lobe. The victim survived, but barely. This incident prompted stricter protocols — the animatronics must be kept on stage during the day."},
+  {threshold:2000, title:"The Music Box", emoji:"🎵", body:"There is something in the Prize Corner. It is kept in a box, bound by music. If the music stops... it leaves. It is the only animatronic that does not follow the rules. It was once a child."},
+  {threshold:10000, title:"The Old Location", emoji:"🏚️", body:"Phone Guy: 'There's a place... the original Fazbear location. We don't talk about it anymore. Something happened there. Something that was covered up. The suits were moved to the new location.' They weren't just suits."},
+  {threshold:50000, title:"Fazbear's Fright Opens", emoji:"🎃", body:"In 2023, Fazbear Entertainment opened a horror attraction based on the legends. While excavating the old location, they found something: a rotting Spring Bonnie animatronic, still standing. Still breathing."},
+  {threshold:100000, title:"Nightmare", emoji:"😈", body:"A child lies in a hospital. In their dreams, massive nightmare versions of the animatronics stalk them. The dreams are caused by their trauma. Or are they caused by the golden bear — Fredbear — whose grip caused the bite?"},
+  {threshold:300000, title:"The Sister Location", emoji:"🤖", body:"Afton Robotics. A subsidiary. Underground. Below a rental location. Here, William Afton built his finest creations: Funtime animatronics, designed to capture and store children. His own daughter came here on her birthday."},
+  {threshold:700000, title:"I Always Come Back", emoji:"☠️", body:"William Afton was cornered by the souls of the children he murdered. He fled. He tried to hide in a Spring Bonnie suit. The spring locks failed. His body was trapped inside. And yet... years later, something still walked."},
+  {threshold:1500000, title:"The Crying Child", emoji:"👦", body:"A boy is afraid of the animatronics. His brother torments him. His father works at the Pizzeria. On his birthday, the nightmare happens — and he is taken to the hospital. The bite. The flatline. The toy on the medical monitor."},
+  {threshold:3000000, title:"Ennard Escapes", emoji:"🕸️", body:"Elizabeth Afton's consciousness, preserved inside Circus Baby, orchestrated the events of the Sister Location. She used the technician as a vessel for Ennard to escape. She was cast out of the collective. She survived."},
+  {threshold:6000000, title:"The Final Trap", emoji:"🔥", body:"Henry Emily's message plays over speakers as the restaurant burns: 'You have all been so good to my children. And I hope you're proud of what you've done to them.' He trapped them all — animatronics and Afton alike — in the flames."},
+  {threshold:10000000, title:"Remnant", emoji:"💉", body:"Afton's research into 'remnant' — the substance left behind by souls — is the true dark heart of the story. It is why the animatronics persist. It is why William persists. Remnant is the reason they cannot die."},
+  {threshold:20000000, title:"Glitchtrap", emoji:"🐛", body:"Fazbear Entertainment released a VR game: Help Wanted. During development, they found corrupted data in old Fazbear circuits. They integrated it. The data was Afton's mind. He began manipulating the game's beta testers. He was escaping."},
+  {threshold:50000000, title:"The Mega Pizzaplex", emoji:"🏟️", body:"Freddy Fazbear's Mega Pizzaplex: the newest, grandest Fazbear location. A mall and arena combined. A child named Gregory is trapped inside after closing. Glamrock Freddy helps him survive. Vanny hunts them. The cycle continues."},
+  {threshold:100000000, title:"The Afton Legacy", emoji:"🟣", body:"William Afton killed. His daughter Elizabeth died. His son (the crying child) died. His other son Michael spent years searching for answers. Everyone Afton touched was consumed. And William himself... he always comes back."},
+];
+
+const ACHIEVEMENTS = [
+  {id:'clicks10', name:"Night Watch", emoji:"📹", check: g => g.clickCount >= 10},
+  {id:'clicks100', name:"Veteran Guard", emoji:"🔦", check: g => g.clickCount >= 100},
+  {id:'clicks1000', name:"Foxy's Prey", emoji:"🦊", check: g => g.clickCount >= 1000},
+  {id:'tokens1000', name:"First Paycheck", emoji:"🪙", check: g => g.totalTokens >= 1000},
+  {id:'tokens1m', name:"Fazbear Fortune", emoji:"💰", check: g => g.totalTokens >= 1000000},
+  {id:'tokens1b', name:"Entertainment Empire", emoji:"🏟️", check: g => g.totalTokens >= 1000000000},
+  {id:'buildings5', name:"Expansion", emoji:"🏚️", check: g => g.buildings.reduce((a,b)=>a+b.count,0) >= 5},
+  {id:'buildings25', name:"Franchise", emoji:"🎪", check: g => g.buildings.reduce((a,b)=>a+b.count,0) >= 25},
+  {id:'upgrades5', name:"Upgraded", emoji:"⬆️", check: g => g.upgrades.filter(u=>u.bought).length >= 5},
+  {id:'upgrades15', name:"Fully Equipped", emoji:"🔧", check: g => g.upgrades.filter(u=>u.bought).length >= 15},
+  {id:'chars10', name:"Collector", emoji:"👾", check: g => g.unlockedChars.size >= 10},
+  {id:'chars30', name:"Fazbear Historian", emoji:"📚", check: g => g.unlockedChars.size >= 30},
+  {id:'chars50', name:"All-Seeing Eye", emoji:"👁️", check: g => g.unlockedChars.size >= 50},
+  {id:'golden', name:"It's Me...", emoji:"✨", check: g => g.goldenCount >= 1},
+  {id:'golden5', name:"Five Nights Survived", emoji:"⭐", check: g => g.goldenCount >= 5},
+  {id:'tps100', name:"Animatronic Army", emoji:"🤖", check: g => g.tokensPerSecond >= 100},
+  {id:'tps10000', name:"Fazbear Empire", emoji:"🌐", check: g => g.tokensPerSecond >= 10000},
+];
+
+const PHASES = [
+  {threshold:0, char:"🐻", name:"FREDDY FAZBEAR", title:"⭐ Five Nights at Freddy's ⭐"},
+  {threshold:1000, char:"🐰", name:"TOY BONNIE", title:"🎪 FNAF 2 — The Old Location"},
+  {threshold:50000, char:"☠️", name:"SPRINGTRAP", title:"🎃 FNAF 3 — Fazbear's Fright"},
+  {threshold:500000, char:"😈", name:"NIGHTMARE FREDBEAR", title:"😱 FNAF 4 — The Bedroom"},
+  {threshold:5000000, char:"🤡", name:"CIRCUS BABY", title:"🤖 Sister Location — Underground"},
+  {threshold:50000000, char:"🎸", name:"GLAMROCK FREDDY", title:"🏟️ Security Breach — Mega Pizzaplex"},
+  {threshold:1000000000, char:"🟣", name:"WILLIAM AFTON", title:"☠️ I ALWAYS COME BACK"},
+];
+
+// ═══════════════════════════════════════════════
+//   GAME STATE
+// ═══════════════════════════════════════════════
+const game = {
+  tokens: 0,
+  totalTokens: 0,
+  tokensPerClick: 1,
+  tokensPerSecond: 0,
+  clickCount: 0,
+  goldenCount: 0,
+  unlockedChars: new Set(),
+  completedMilestones: new Set(),
+  earnedAchs: new Set(),
+  buildings: BUILDINGS.map(b => ({...b, count:0, mult:1})),
+  upgrades: UPGRADES.map(u => ({...u, bought:false})),
+  currentPhase: 0,
+};
+
+// ═══════════════════════════════════════════════
+//   HELPERS
+// ═══════════════════════════════════════════════
+function fmt(n) {
+  if (n >= 1e12) return (n/1e12).toFixed(2) + 'T';
+  if (n >= 1e9) return (n/1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return Math.floor(n).toString();
+}
+
+function getBuildingCost(b) {
+  return Math.floor(b.baseCost * Math.pow(1.15, b.count));
+}
+
+function recalc() {
+  // clicks
+  let tpc = 1;
+  let mult = 1;
+  for (const u of game.upgrades) {
+    if (!u.bought) continue;
+    if (u.type === 'click') tpc += u.val;
+    if (u.type === 'clickmult') mult *= u.val;
+  }
+  game.tokensPerClick = tpc * mult;
+
+  // tps
+  let tps = 0;
+  for (const b of game.buildings) {
+    let bprod = b.baseProduction;
+    // apply building upgrades
+    for (const u of game.upgrades) {
+      if (!u.bought) continue;
+      if (u.type === 'building' && u.bid === b.id) bprod *= u.val;
+    }
+    tps += bprod * b.count * b.mult;
+  }
+  game.tokensPerSecond = tps;
+}
+
+// ═══════════════════════════════════════════════
+//   CLICK
+// ═══════════════════════════════════════════════
+function doClick(e) {
+  game.tokens += game.tokensPerClick;
+  game.totalTokens += game.tokensPerClick;
+  game.clickCount++;
+  spawnFloat(e.clientX, e.clientY, '+' + fmt(game.tokensPerClick));
+
+  // 1% Golden Freddy
+  if (Math.random() < 0.01) triggerGoldenFreddy();
+
+  checkAll();
+  renderStats();
+}
+
+function spawnFloat(x, y, text, red=false) {
+  const el = document.createElement('div');
+  el.className = 'float-num' + (red?' red':'');
+  el.textContent = text;
+  el.style.left = (x - 20 + Math.random()*40) + 'px';
+  el.style.top = (y - 20) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+// ═══════════════════════════════════════════════
+//   GOLDEN FREDDY
+// ═══════════════════════════════════════════════
+function triggerGoldenFreddy() {
+  game.goldenCount++;
+  const bonus = Math.floor(game.tokensPerClick * 777);
+  document.getElementById('gf-bonus').textContent = fmt(bonus);
+  document.getElementById('golden-freddy-overlay').classList.add('show');
+  window._gfBonus = bonus;
+}
+
+function dismissGoldenFreddy() {
+  document.getElementById('golden-freddy-overlay').classList.remove('show');
+  game.tokens += window._gfBonus;
+  game.totalTokens += window._gfBonus;
+  addLog("✨ Golden Freddy appeared!", `You collected ${fmt(window._gfBonus)} Faz Tokens from the golden apparition.`, 'lore');
+  checkAll();
+  renderStats();
+}
+
+// ═══════════════════════════════════════════════
+//   BUY BUILDING
+// ═══════════════════════════════════════════════
+function buyBuilding(id) {
+  const b = game.buildings.find(x => x.id === id);
+  const cost = getBuildingCost(b);
+  if (game.tokens < cost) return;
+  game.tokens -= cost;
+  b.count++;
+  recalc();
+  checkAll();
+  renderStats();
+  renderBuildings();
+  renderUpgrades();
+}
+
+function buyUpgrade(id) {
+  const u = game.upgrades.find(x => x.id === id);
+  if (!u || u.bought || game.tokens < u.cost) return;
+  game.tokens -= u.cost;
+  u.bought = true;
+  recalc();
+  checkAll();
+  renderStats();
+  renderUpgrades();
+  renderBuildings();
+  addLog("⬆ Upgrade: " + u.name, u.desc, 'unlock');
+}
+
+// ═══════════════════════════════════════════════
+//   MODAL
+// ═══════════════════════════════════════════════
+let _modalQueue = [];
+let _modalOpen = false;
+
+function showModal(emoji, title, body) {
+  _modalQueue.push({emoji, title, body});
+  if (!_modalOpen) popModal();
+}
+
+function popModal() {
+  if (_modalQueue.length === 0) { _modalOpen = false; return; }
+  _modalOpen = true;
+  const m = _modalQueue.shift();
+  document.getElementById('modal-emoji').textContent = m.emoji;
+  document.getElementById('modal-title').textContent = m.title;
+  document.getElementById('modal-body').textContent = m.body;
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  _modalOpen = false;
+  setTimeout(popModal, 300);
+}
+
+// ═══════════════════════════════════════════════
+//   LOG
+// ═══════════════════════════════════════════════
+function addLog(title, body, type='') {
+  const log = document.getElementById('story-log');
+  const el = document.createElement('div');
+  el.className = 'log-entry ' + type;
+  el.innerHTML = `<div class="log-title">${title}</div><div class="log-body">${body}</div>`;
+  log.insertBefore(el, log.firstChild);
+}
+
+// ═══════════════════════════════════════════════
+//   CHECK ALL (milestones, chars, achs, phase)
+// ═══════════════════════════════════════════════
+function checkAll() {
+  // Lore milestones
+  for (const evt of LORE_EVENTS) {
+    if (game.totalTokens >= evt.threshold && !game.completedMilestones.has(evt.title)) {
+      game.completedMilestones.add(evt.title);
+      addLog("📼 " + evt.title, evt.body, 'lore');
+      showModal(evt.emoji, evt.title, evt.body);
+    }
+  }
+  // Characters
+  for (const ch of CHARACTERS) {
+    if (game.totalTokens >= ch.unlock && !game.unlockedChars.has(ch.id)) {
+      game.unlockedChars.add(ch.id);
+      addLog("👾 Unlocked: " + ch.name, ch.lore, 'unlock');
+      renderChars();
+    }
+  }
+  // Achievements
+  for (const ach of ACHIEVEMENTS) {
+    if (!game.earnedAchs.has(ach.id) && ach.check(game)) {
+      game.earnedAchs.add(ach.id);
+      addLog("🏆 Achievement: " + ach.name, '', 'unlock');
+      renderAchs();
+    }
+  }
+  // Phase
+  let newPhase = 0;
+  for (let i = 0; i < PHASES.length; i++) {
+    if (game.totalTokens >= PHASES[i].threshold) newPhase = i;
+  }
+  if (newPhase !== game.currentPhase) {
+    game.currentPhase = newPhase;
+    document.getElementById('clicker-emoji').textContent = PHASES[newPhase].char;
+    document.getElementById('clicker-char-name').textContent = PHASES[newPhase].name;
+    document.getElementById('phase-title').textContent = PHASES[newPhase].title;
+  }
+}
+
+// ═══════════════════════════════════════════════
+//   RENDER STATS
+// ═══════════════════════════════════════════════
+function renderStats() {
+  document.getElementById('stat-tokens').textContent = fmt(game.tokens);
+  document.getElementById('stat-tps').textContent = fmt(game.tokensPerSecond) + '/s';
+  document.getElementById('stat-tpc').textContent = fmt(game.tokensPerClick);
+  document.getElementById('stat-total').textContent = fmt(game.totalTokens);
+  document.getElementById('stat-clicks').textContent = fmt(game.clickCount);
+
+  // Progress bar - next milestone
+  let next = LORE_EVENTS.find(e => game.totalTokens < e.threshold);
+  if (next) {
+    let prev = 0;
+    const idx = LORE_EVENTS.indexOf(next);
+    if (idx > 0) prev = LORE_EVENTS[idx-1].threshold;
+    const pct = Math.min(100, ((game.totalTokens - prev) / (next.threshold - prev)) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = `Next: ${next.title} (${fmt(next.threshold)} tokens)`;
+  } else {
+    document.getElementById('progress-fill').style.width = '100%';
+    document.getElementById('progress-label').textContent = 'All story events unlocked!';
+  }
+}
+
+// ═══════════════════════════════════════════════
+//   RENDER UPGRADES
+// ═══════════════════════════════════════════════
+function renderUpgrades() {
+  const el = document.getElementById('tab-upgrades');
+  el.innerHTML = '<div class="section-header">🔬 UPGRADES</div>';
+  for (const u of game.upgrades) {
+    const affordable = game.tokens >= u.cost;
+    const cls = u.bought ? 'bought' : affordable ? 'upgrade-item affordable' : 'upgrade-item';
+    const div = document.createElement('div');
+    div.className = 'upgrade-item ' + (u.bought ? 'bought' : affordable ? 'affordable' : '');
+    div.innerHTML = `
+      <div class="upgrade-icon">${u.icon}</div>
+      <div class="upgrade-info">
+        <div class="uname">${u.name} ${u.bought ? '✓' : ''}</div>
+        <div class="udesc">${u.desc}</div>
+        ${!u.bought ? `<div class="ucost">🪙 ${fmt(u.cost)}</div>` : ''}
+      </div>`;
+    if (!u.bought) div.onclick = () => buyUpgrade(u.id);
+    el.appendChild(div);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//   RENDER BUILDINGS
+// ═══════════════════════════════════════════════
+function renderBuildings() {
+  const el = document.getElementById('tab-buildings');
+  el.innerHTML = '<div class="section-header">🏚 LOCATIONS</div>';
+  for (const b of game.buildings) {
+    const cost = getBuildingCost(b);
+    const affordable = game.tokens >= cost;
+    const div = document.createElement('div');
+    div.className = 'building-item' + (affordable ? ' affordable' : '');
+    let prodPerSec = b.baseProduction;
+    // apply upgrades
+    for (const u of game.upgrades) {
+      if (u.bought && u.type === 'building' && u.bid === b.id) prodPerSec *= u.val;
+    }
+    div.innerHTML = `
+      <div class="building-header">
+        <div class="building-left">
+          <span class="building-icon">${b.icon}</span>
+          <div>
+            <div class="building-name">${b.name}</div>
+            <div class="building-cost">🪙 ${fmt(cost)}</div>
+          </div>
+        </div>
+        <div class="building-count">${b.count}</div>
+      </div>
+      <div class="building-desc">${b.desc}</div>
+      <div class="building-prod">⚡ ${fmt(prodPerSec * b.count)}/s total (${fmt(prodPerSec)} each)</div>`;
+    div.onclick = () => buyBuilding(b.id);
+    el.appendChild(div);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//   RENDER CHARS
+// ═══════════════════════════════════════════════
+function renderChars() {
+  const el = document.getElementById('tab-characters');
+  el.innerHTML = `<div class="section-header">👾 CHARACTERS — ${game.unlockedChars.size}/${CHARACTERS.length}</div>`;
+  const grid = document.createElement('div');
+  grid.id = 'chars-grid';
+  for (const ch of CHARACTERS) {
+    const unlocked = game.unlockedChars.has(ch.id);
+    const card = document.createElement('div');
+    card.className = 'char-card ' + (unlocked ? 'unlocked' : 'locked');
+    card.innerHTML = `
+      <span class="cc-emoji">${unlocked ? ch.icon : '❓'}</span>
+      <div class="cc-name">${unlocked ? ch.name : '???'}</div>
+      <div class="cc-game">${unlocked ? ch.game : '???'}</div>
+      ${unlocked ? `<div class="cc-lore">${ch.lore}</div>` : `<div class="cc-lore">Unlock at ${fmt(ch.unlock)} tokens</div>`}`;
+    grid.appendChild(card);
+  }
+  el.appendChild(grid);
+}
+
+// ═══════════════════════════════════════════════
+//   RENDER ACHIEVEMENTS
+// ═══════════════════════════════════════════════
+function renderAchs() {
+  const el = document.getElementById('ach-list');
+  el.innerHTML = '';
+  for (const ach of ACHIEVEMENTS) {
+    const earned = game.earnedAchs.has(ach.id);
+    if (!earned) continue;
+    const b = document.createElement('div');
+    b.className = 'ach-badge earned';
+    b.textContent = ach.emoji + ' ' + ach.name;
+    b.title = ach.name;
+    el.appendChild(b);
+  }
+  if (el.children.length === 0) {
+    el.innerHTML = '<span style="color:#551111;font-size:14px">No achievements yet...</span>';
+  }
+}
+
+// ═══════════════════════════════════════════════
+//   TABS
+// ═══════════════════════════════════════════════
+let currentTab = 'upgrades';
+function switchTab(tab) {
+  document.querySelectorAll('.shop-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-upgrades').style.display = tab === 'upgrades' ? '' : 'none';
+  document.getElementById('tab-buildings').style.display = tab === 'buildings' ? '' : 'none';
+  document.getElementById('tab-characters').style.display = tab === 'characters' ? '' : 'none';
+  currentTab = tab;
+  if (tab === 'characters') renderChars();
+  if (tab === 'buildings') renderBuildings();
+  if (tab === 'upgrades') renderUpgrades();
+}
+
+// ═══════════════════════════════════════════════
+//   GAME LOOP
+// ═══════════════════════════════════════════════
+let lastTime = Date.now();
+setInterval(() => {
+  const now = Date.now();
+  const dt = (now - lastTime) / 1000;
+  lastTime = now;
+  const earned = game.tokensPerSecond * dt;
+  if (earned > 0) {
+    game.tokens += earned;
+    game.totalTokens += earned;
+  }
+  renderStats();
+  checkAll();
+  // Refresh current tab display
+  if (currentTab === 'upgrades') renderUpgrades();
+  else if (currentTab === 'buildings') renderBuildings();
+}, 200);
+
+// ═══════════════════════════════════════════════
+//   INIT
+// ═══════════════════════════════════════════════
+recalc();
+renderStats();
+renderUpgrades();
+renderBuildings();
+renderChars();
+renderAchs();
+// Unlock Freddy immediately
+game.unlockedChars.add('freddy');
+renderChars();
+</script>
+</body>
 </html>
