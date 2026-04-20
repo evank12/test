@@ -160,6 +160,7 @@ const auth = getAuth(app);
 /* ---------------- UI GUARD ---------------- */
 function showBlocked(reason) {
   document.body.style.visibility = "visible";
+
   document.body.innerHTML = `
     <div style="
       position:fixed;inset:0;
@@ -172,12 +173,46 @@ function showBlocked(reason) {
       font-family:monospace;
       text-align:center;
       padding:20px;
+      gap:12px;
     ">
       <h1>ACCESS BLOCKED</h1>
-      <p>${reason}</p>
-      <p style="opacity:0.6;margin-top:10px;">If this is wrong, try refreshing or re-redeeming your code.</p>
+
+      <p style="max-width:500px;">${reason}</p>
+
+      <button id="resetBtn" style="
+        margin-top:15px;
+        padding:10px 18px;
+        background:#1a0000;
+        border:1px solid #ff3b3b;
+        color:#ff3b3b;
+        cursor:pointer;
+        font-family:monospace;
+      ">
+        RESET ACCESS
+      </button>
+
+      <p style="opacity:0.6;font-size:12px;margin-top:10px;">
+        This will clear saved code data and return you to the redeem screen.
+      </p>
     </div>
   `;
+
+  document.getElementById("resetBtn").onclick = async () => {
+    try {
+      localStorage.removeItem("hasAccess");
+      localStorage.removeItem("redeemedCode");
+
+      // optional but recommended if you're using Firebase Auth
+      if (auth?.currentUser) {
+        await auth.signOut();
+      }
+
+      window.location.replace("index.html");
+    } catch (e) {
+      console.error(e);
+      window.location.reload();
+    }
+  };
 }
 
 /* ---------------- MAIN CHECK ---------------- */
