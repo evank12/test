@@ -45,51 +45,59 @@ resetBtn.addEventListener("click", () => {
       await signInAnonymously(auth);
     }
 
-    async function redeemCode() {
-      const code = document.getElementById("codeInput").value.trim();
-
-      if (!code) {
-        statusText.innerText = "Enter a code.";
-        return;
-      }
-
-      statusText.innerText = "Checking code...";
-
-      const docRef = doc(db, "codes", code);
-      const snap = await getDoc(docRef);
-
-      if (!snap.exists()) {
-        statusText.innerText = "Invalid code.";
-        return;
-      }
-
-      const data = snap.data();
-
-      if (data.used === true) {
-        statusText.innerText = "Code already used.";
-        return;
-      }
-
-      await updateDoc(docRef, { used: true });
-
-const user = auth.currentUser;
-if (user) {
-  await setDoc(doc(db, "users", user.uid), {
-    hasAccess: true,
-    redeemedCode: code,
-    redeemedAt: serverTimestamp()
-  }, { merge: true });
+async function hashCode(code) {
+  const enc = new TextEncoder();
+  const data = enc.encode(code);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-localStorage.setItem("hasAccess", "true");
-localStorage.setItem("redeemedCode", code);
+async function redeemCode() {
+  const code = document.getElementById("codeInput").value.trim();
 
-statusText.innerText = "Code accepted! Redirecting...";
+  if (!code) {
+    statusText.innerText = "Enter a code.";
+    return;
+  }
 
-setTimeout(() => {
-  window.location.href = "fnafclicker.html";
-}, 800);
+  statusText.innerText = "Checking...";
+
+  const hashed = await hashCode(code);
+
+  const snapshot = await getDocs(collection(db, "codes"));
+
+  let matchDoc = null;
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    if (data.hash === hashed) {
+      matchDoc = { id: docSnap.id, data };
     }
+  });
+
+  if (!matchDoc) {
+    statusText.innerText = "Invalid code.";
+    return;
+  }
+
+  if (matchDoc.data.used) {
+    statusText.innerText = "Code already used.";
+    return;
+  }
+
+  await updateDoc(doc(db, "codes", matchDoc.id), {
+    used: true
+  });
+
+  localStorage.setItem("hasAccess", "true");
+
+  statusText.innerText = "Success! Redirecting...";
+
+  setTimeout(() => {
+    window.location.href = "fnafclicker.html";
+  }, 800);
+}
 
     btn.addEventListener("click", redeemCode);
 
