@@ -97,6 +97,8 @@ async function redeemCode() {
   });
 
   localStorage.setItem("hasAccess", "true");
+  localStorage.setItem("redeemedCode", code);
+  window.location.href = "fnafclicker.html";
 
   statusText.innerText = "Success! Redirecting...";
 
