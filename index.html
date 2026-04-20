@@ -95,7 +95,6 @@ setTimeout(() => {
 
     await login();
 
-    // if they already have access, send them directly
     if (localStorage.getItem("hasAccess") === "true") {
       window.location.href = "fnafclicker.html";
     }
