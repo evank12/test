@@ -11,23 +11,18 @@
 
   <p id="status"></p>
 
-  <div id="protected" style="display:none;">
-    <h2>Protected Content</h2>
-    <p>You now have access.</p>
-  </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const firebaseConfig = {
-    apiKey: "AIzaSyBg9nC74B16acZNHLOZpNHwj2YPYDL2clU",
-    authDomain: "sfc-early-access.firebaseapp.com",
-    projectId: "sfc-early-access",
-    storageBucket: "sfc-early-access.firebasestorage.app",
-    messagingSenderId: "602773525803",
-    appId: "1:602773525803:web:fc719630af298aeaa6a16e"
+      apiKey: "AIzaSyBg9nC74B16acZNHLOZpNHwj2YPYDL2clU",
+      authDomain: "sfc-early-access.firebaseapp.com",
+      projectId: "sfc-early-access",
+      storageBucket: "sfc-early-access.firebasestorage.app",
+      messagingSenderId: "602773525803",
+      appId: "1:602773525803:web:fc719630af298aeaa6a16e"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -35,22 +30,10 @@
     const auth = getAuth(app);
 
     const statusText = document.getElementById("status");
-    const protectedDiv = document.getElementById("protected");
     const btn = document.getElementById("btn");
 
     async function login() {
       await signInAnonymously(auth);
-    }
-
-    function showProtected() {
-      protectedDiv.style.display = "block";
-    }
-
-    async function checkSavedAccess() {
-      if (localStorage.getItem("hasAccess") === "true") {
-        statusText.innerText = "Access already granted.";
-        showProtected();
-      }
     }
 
     async function redeemCode() {
@@ -81,14 +64,23 @@
       await updateDoc(docRef, { used: true });
 
       localStorage.setItem("hasAccess", "true");
-      statusText.innerText = "Code accepted! Access granted.";
-      showProtected();
+      localStorage.setItem("redeemedCode", code);
+
+      statusText.innerText = "Code accepted! Redirecting...";
+
+      setTimeout(() => {
+        window.location.href = "fnafclicker.html";
+      }, 800);
     }
 
     btn.addEventListener("click", redeemCode);
 
     await login();
-    await checkSavedAccess();
+
+    // if they already have access, send them directly
+    if (localStorage.getItem("hasAccess") === "true") {
+      window.location.href = "fnafclicker.html";
+    }
   </script>
 </body>
 </html>
