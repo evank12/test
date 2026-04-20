@@ -139,75 +139,107 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 </head>
 <body style="visibility:hidden;">
 
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import {
-  getFirestore,
-  doc,
-  getDoc,
-  getDocs,
-  collection
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBg9nC74B16acZNHLOZpNHwj2YPYDL2clU",
-    authDomain: "sfc-early-access.firebaseapp.com",
-    projectId: "sfc-early-access",
-    storageBucket: "sfc-early-access.firebasestorage.app",
-    messagingSenderId: "602773525803",
-    appId: "1:602773525803:web:fc719630af298aeaa6a16e"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyBg9nC74B16acZNHLOZpNHwj2YPYDL2clU",
+  authDomain: "sfc-early-access.firebaseapp.com",
+  projectId: "sfc-early-access",
+  storageBucket: "sfc-early-access.firebasestorage.app",
+  messagingSenderId: "602773525803",
+  appId: "1:602773525803:web:fc719630af298aeaa6a16e"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
- function safeRedirect(url) {
-  if (sessionStorage.getItem("redirecting")) return;
-  sessionStorage.setItem("redirecting", "true");
-  window.location.replace(url);
+/* ---------------- UI GUARD ---------------- */
+function showBlocked(reason) {
+  document.body.style.visibility = "visible";
+  document.body.innerHTML = `
+    <div style="
+      position:fixed;inset:0;
+      background:#000;
+      color:#ff3b3b;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      font-family:monospace;
+      text-align:center;
+      padding:20px;
+    ">
+      <h1>ACCESS BLOCKED</h1>
+      <p>${reason}</p>
+      <p style="opacity:0.6;margin-top:10px;">If this is wrong, try refreshing or re-redeeming your code.</p>
+    </div>
+  `;
 }
 
+/* ---------------- MAIN CHECK ---------------- */
 async function verifyAccess() {
   try {
-    const cred = await signInAnonymously(auth);
-    const user = cred.user;
+    document.body.style.visibility = "hidden";
 
-    const accessSnap = await getDoc(doc(db, "users", user.uid));
+    await signInAnonymously(auth);
+    const user = auth.currentUser;
 
-    if (!accessSnap.exists() || accessSnap.data().hasAccess !== true) {
-      localStorage.removeItem("hasAccess");
-      localStorage.removeItem("redeemedCode");
-      safeRedirect("index.html");
+    if (!user) {
+      showBlocked("Auth failed (no user session).");
       return;
     }
 
-    const redeemedCode = accessSnap.data().redeemedCode;
+    const accessRef = doc(db, "users", user.uid);
+    const accessSnap = await getDoc(accessRef);
+
+    if (!accessSnap.exists()) {
+      showBlocked("No access record found for this account.");
+      return;
+    }
+
+    const data = accessSnap.data();
+
+    if (data.hasAccess !== true) {
+      showBlocked("You do not have early access.");
+      return;
+    }
+
+    const redeemedCode = data.redeemedCode;
 
     if (!redeemedCode) {
-      safeRedirect("index.html");
+      showBlocked("No redeemed code linked to this account.");
       return;
     }
 
     const codeSnap = await getDoc(doc(db, "codes", redeemedCode));
 
-    if (!codeSnap.exists() || codeSnap.data().used !== true) {
-      safeRedirect("index.html");
+    if (!codeSnap.exists()) {
+      showBlocked("Redeemed code no longer exists.");
       return;
     }
 
+    if (codeSnap.data().used !== true) {
+      showBlocked("This code is not marked as used.");
+      return;
+    }
+
+    // SUCCESS
     localStorage.setItem("hasAccess", "true");
     localStorage.setItem("redeemedCode", redeemedCode);
+
     document.body.style.visibility = "visible";
 
   } catch (err) {
     console.error("Access check failed:", err);
-    safeRedirect("index.html");
+    showBlocked("System error while verifying access.");
   }
 }
 
-  verifyAccess();
+verifyAccess();
 </script>
 
 <div id="ticker-wrap"><span id="ticker">★ FNAF CLICKER EARLY ACCESS MODE ★ Five Nights at Freddy's Clicker EARLY ACCESS MODE ★ Beware of the animatronics ★ He's watching... ★ The show starts at midnight ★ It's Me... ★ Can you survive? ★ FNAF CLICKER EARLY ACCESS MODE ★</span></div>
