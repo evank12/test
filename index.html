@@ -8,6 +8,7 @@
 
   <input id="codeInput" placeholder="Enter code">
   <button id="btn">Submit</button>
+  <button id="resetBtn">Reset Access DANGEROUS!!!!!!!!!</button>
 
   <p id="status"></p>
 
@@ -24,6 +25,14 @@
       messagingSenderId: "602773525803",
       appId: "1:602773525803:web:fc719630af298aeaa6a16e"
     };
+
+const resetBtn = document.getElementById("resetBtn");
+    
+resetBtn.addEventListener("click", () => {
+  localStorage.removeItem("hasAccess");
+  localStorage.removeItem("redeemedCode");
+  statusText.innerText = "Local access cleared. Enter a new code.";
+});
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
