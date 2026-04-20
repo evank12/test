@@ -176,11 +176,70 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 }
 </style>
 </head>
-<body>
+<body style="visibility:hidden;">
 
-<div id="ticker-wrap"><span id="ticker">★ FNAF CLICKER ★ Five Nights at Freddy's Clicker ★ Beware of the animatronics ★ He's watching... ★ The show starts at midnight ★ It's Me... ★ Can you survive? ★ FNAF CLICKER ★</span></div>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-<div id="header"><h1>🎪 FNAF <span>CLICKER</span> 🎪</h1></div>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBg9nC74B16acZNHLOZpNHwj2YPYDL2clU",
+    authDomain: "sfc-early-access.firebaseapp.com",
+    projectId: "sfc-early-access",
+    storageBucket: "sfc-early-access.firebasestorage.app",
+    messagingSenderId: "602773525803",
+    appId: "1:602773525803:web:fc719630af298aeaa6a16e"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  async function verifyAccess() {
+    try {
+      await signInAnonymously(auth);
+
+      const user = auth.currentUser;
+      if (!user) throw new Error("No auth user");
+
+      const accessSnap = await getDoc(doc(db, "users", user.uid));
+
+      if (!accessSnap.exists() || accessSnap.data().hasAccess !== true) {
+        localStorage.removeItem("hasAccess");
+        localStorage.removeItem("redeemedCode");
+        window.location.replace("index.html");
+        return;
+      }
+
+      const redeemedCode = accessSnap.data().redeemedCode;
+      if (!redeemedCode) {
+        window.location.replace("index.html");
+        return;
+      }
+
+      const codeSnap = await getDoc(doc(db, "codes", redeemedCode));
+
+      if (!codeSnap.exists() || codeSnap.data().used !== true) {
+        window.location.replace("index.html");
+        return;
+      }
+
+      localStorage.setItem("hasAccess", "true");
+      localStorage.setItem("redeemedCode", redeemedCode);
+      document.body.style.visibility = "visible";
+    } catch (err) {
+      console.error("Access check failed:", err);
+      window.location.replace("index.html");
+    }
+  }
+
+  verifyAccess();
+</script>
+
+<div id="ticker-wrap"><span id="ticker">★ FNAF CLICKER EARLY ACCESS MODE ★ Five Nights at Freddy's Clicker EARLY ACCESS MODE ★ Beware of the animatronics ★ He's watching... ★ The show starts at midnight ★ It's Me... ★ Can you survive? ★ FNAF CLICKER EARLY ACCESS MODE ★</span></div>
+
+<div id="header"><h1>🎪 FNAF <span>CLICKER</span> 🎪 EARLY ACCESS MODE</h1></div>
 
 <div id="game">
   <!-- LEFT -->
