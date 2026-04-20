@@ -7,7 +7,7 @@
   <h1>Enter Access Code</h1>
 
   <input id="codeInput" placeholder="Enter code">
-  <button onclick="redeemCode()">Submit</button>
+  <button id="btn">Submit</button>
 
   <p id="status"></p>
 
@@ -17,12 +17,12 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const firebaseConfig = {
-  const firebaseConfig = {
+   const firebaseConfig = {
     apiKey: "AIzaSyBg9nC74B16acZNHLOZpNHwj2YPYDL2clU",
     authDomain: "sfc-early-access.firebaseapp.com",
     projectId: "sfc-early-access",
@@ -37,59 +37,56 @@
 
     const statusText = document.getElementById("status");
     const protectedDiv = document.getElementById("protected");
+    const btn = document.getElementById("btn");
 
     async function login() {
       await signInAnonymously(auth);
     }
 
+    function showProtected() {
+      protectedDiv.style.display = "block";
+    }
+
     async function checkSavedAccess() {
       if (localStorage.getItem("hasAccess") === "true") {
-        protectedDiv.style.display = "block";
         statusText.innerText = "Access already granted.";
+        showProtected();
       }
     }
 
-    window.redeemCode = async function() {
-      const input = document.getElementById("codeInput").value.trim();
+    async function redeemCode() {
+      const code = document.getElementById("codeInput").value.trim();
 
-      if (!input) {
+      if (!code) {
         statusText.innerText = "Enter a code.";
         return;
       }
 
       statusText.innerText = "Checking code...";
 
-      const codesRef = collection(db, "codes");
-      const snapshot = await getDocs(codesRef);
+      const docRef = doc(db, "codes", code);
+      const snap = await getDoc(docRef);
 
-      let foundDoc = null;
-
-      snapshot.forEach((d) => {
-        const data = d.data();
-        if (data.code === input) {
-          foundDoc = { id: d.id, data };
-        }
-      });
-
-      if (!foundDoc) {
+      if (!snap.exists()) {
         statusText.innerText = "Invalid code.";
         return;
       }
 
-      if (foundDoc.data.used === true) {
+      const data = snap.data();
+
+      if (data.used === true) {
         statusText.innerText = "Code already used.";
         return;
       }
 
-      await updateDoc(doc(db, "codes", foundDoc.id), {
-        used: true
-      });
+      await updateDoc(docRef, { used: true });
 
       localStorage.setItem("hasAccess", "true");
-
       statusText.innerText = "Code accepted! Access granted.";
-      protectedDiv.style.display = "block";
-    };
+      showProtected();
+    }
+
+    btn.addEventListener("click", redeemCode);
 
     await login();
     await checkSavedAccess();
