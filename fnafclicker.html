@@ -16,32 +16,20 @@
 body{background:var(--bg);color:var(--text);font-family:'VT323',monospace;font-size:17px;min-height:100vh;overflow-x:hidden;user-select:none;}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,#1a000a 0%,#060008 70%);pointer-events:none;z-index:0;}
 body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:9999;}
-
-/* TICKER */
 #ticker-wrap{position:relative;z-index:10;background:#0a0000;border-bottom:2px solid var(--border);padding:6px 0;overflow:hidden;}
 #ticker{white-space:nowrap;animation:tickerMove 30s linear infinite;display:inline-block;font-family:'Creepster',cursive;font-size:16px;color:var(--accent);}
 @keyframes tickerMove{0%{transform:translateX(100vw);}100%{transform:translateX(-100%)}}
-
-/* HEADER */
 #header{position:relative;z-index:10;text-align:center;padding:10px;background:linear-gradient(180deg,#1a0005,transparent);border-bottom:1px solid #3a0000;}
 #header h1{font-family:'Creepster',cursive;font-size:48px;color:var(--accent);text-shadow:0 0 20px #ff0000,0 0 40px #ff000080;letter-spacing:4px;animation:flicker 4s infinite;}
 #header h1 span{color:var(--gold);}
 @keyframes flicker{0%,95%,100%{opacity:1;}96%,99%{opacity:0.3;}}
-
-/* LAYOUT */
 #game{display:grid;grid-template-columns:1fr 320px 380px;gap:0;position:relative;z-index:10;height:calc(100vh - 110px);overflow:hidden;}
-
-/* LEFT PANEL - STATS + CLICKER */
 #left-panel{border-right:2px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:15px;overflow-y:auto;overflow-x:hidden;background:linear-gradient(180deg,#0d0015,#060008);min-height:0;}
-
 #stats{width:100%;background:var(--panel2);border:1px solid var(--border);padding:10px;margin-bottom:12px;border-radius:4px;}
 #stats .stat{display:flex;justify-content:space-between;padding:2px 0;}
 #stats .stat span{color:var(--green);font-size:20px;}
 #stats .label{color:#ff8888;}
-
 #phase-title{font-family:'Creepster',cursive;font-size:22px;color:var(--gold);text-align:center;margin-bottom:8px;text-shadow:0 0 10px var(--gold);}
-
-/* CLICKER */
 #clicker-area{position:relative;cursor:pointer;margin:10px 0;}
 #clicker-btn{width:240px;height:240px;border-radius:50%;border:4px solid var(--border);background:radial-gradient(circle,#1a000a,#060008);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .08s,box-shadow .08s;box-shadow:0 0 30px #ff000040,inset 0 0 40px #1a0005;position:relative;overflow:hidden;}
 #clicker-btn:hover{box-shadow:0 0 50px #ff000070,inset 0 0 40px #2a0010;}
@@ -49,21 +37,19 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 #clicker-btn .char-emoji{font-size:90px;line-height:1;filter:drop-shadow(0 0 15px #ff000080);}
 #clicker-btn .char-name{font-family:'Creepster',cursive;font-size:16px;color:var(--accent);margin-top:4px;}
 #clicker-btn::after{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.05),transparent 60%);pointer-events:none;}
-
+@keyframes borderPulse{0%,100%{box-shadow:0 0 30px #ff000040,inset 0 0 40px #1a0005;}50%{box-shadow:0 0 60px #ff000070,inset 0 0 60px #2a0010;}}
+#clicker-btn{animation:borderPulse 3s ease-in-out infinite;}
 #golden-freddy-overlay{display:none;position:fixed;inset:0;background:#000;z-index:10000;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;}
 #golden-freddy-overlay.show{display:flex;}
 #golden-freddy-overlay .gf-char{font-size:200px;animation:gfPulse .5s infinite alternate;}
 #golden-freddy-overlay p{font-family:'Creepster',cursive;font-size:48px;color:var(--gold);margin-top:20px;}
 #golden-freddy-overlay p.sub{font-size:24px;color:var(--accent);margin-top:10px;}
 @keyframes gfPulse{0%{filter:brightness(0.5) sepia(1) hue-rotate(30deg);transform:scale(0.95);}100%{filter:brightness(1.5) sepia(1) hue-rotate(50deg);transform:scale(1.05);}}
-
 #click-info{font-size:20px;color:#ff7777;margin-top:8px;}
 #progress-bar-wrap{width:100%;margin-top:10px;}
 #progress-bar-wrap label{font-size:16px;color:#aa6666;}
 #progress-bar{width:100%;height:12px;background:#1a0008;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-top:4px;}
 #progress-fill{height:100%;background:linear-gradient(90deg,#8b0000,var(--accent));transition:width .3s;border-radius:6px;}
-
-/* MIDDLE PANEL - SHOP */
 #middle-panel{border-right:2px solid var(--border);display:flex;flex-direction:column;background:var(--panel);min-height:0;}
 #shop-tabs{display:flex;border-bottom:2px solid var(--border);flex-shrink:0;}
 .shop-tab{flex:1;padding:10px 5px;text-align:center;cursor:pointer;font-family:'Creepster',cursive;font-size:18px;color:var(--dim);border:none;background:transparent;transition:all .2s;}
@@ -73,8 +59,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 #shop-content::-webkit-scrollbar{width:6px;}
 #shop-content::-webkit-scrollbar-track{background:#0a0010;}
 #shop-content::-webkit-scrollbar-thumb{background:var(--border);}
-
-/* UPGRADES */
 .upgrade-item{display:flex;align-items:center;gap:8px;padding:8px;margin-bottom:6px;background:#0e0018;border:1px solid #3a0030;border-radius:4px;cursor:pointer;transition:all .2s;}
 .upgrade-item:hover:not(.bought):not(.locked){border-color:var(--accent);background:#18001a;}
 .upgrade-item.bought{opacity:0.4;border-color:#222;cursor:default;}
@@ -84,8 +68,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .upgrade-info .uname{font-family:'Creepster',cursive;font-size:18px;color:#ffcccc;}
 .upgrade-info .udesc{font-size:14px;color:#aa6666;}
 .upgrade-info .ucost{font-size:15px;color:var(--gold);}
-
-/* BUILDINGS */
 .building-item{padding:8px;margin-bottom:8px;background:#0e0015;border:1px solid #3a0020;border-radius:4px;cursor:pointer;transition:all .2s;}
 .building-item:hover:not(.locked){border-color:var(--accent);background:#150010;}
 .building-item.locked{opacity:0.35;cursor:not-allowed;}
@@ -98,8 +80,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .building-desc{font-size:14px;color:#aa6666;margin-top:3px;}
 .building-cost{font-size:15px;color:var(--gold);}
 .building-prod{font-size:14px;color:#88cc88;}
-
-/* CHARACTERS */
 #chars-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px;}
 .char-card{background:#0e0018;border:1px solid #3a0028;border-radius:6px;padding:8px;text-align:center;transition:all .2s;}
 .char-card.unlocked{border-color:#8b0050;box-shadow:0 0 10px #8b005040;}
@@ -108,8 +88,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .char-card .cc-name{font-family:'Creepster',cursive;font-size:16px;color:#ffcccc;}
 .char-card .cc-game{font-size:12px;color:#886666;}
 .char-card .cc-lore{font-size:12px;color:#aa7777;margin-top:4px;line-height:1.3;}
-
-/* RIGHT PANEL - STORY/LOG */
 #right-panel{display:flex;flex-direction:column;background:linear-gradient(180deg,#080012,#060008);min-height:0;}
 #right-panel h2{font-family:'Creepster',cursive;font-size:24px;color:var(--accent);padding:10px 15px;border-bottom:2px solid var(--border);text-align:center;}
 #story-log{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:0;}
@@ -124,14 +102,11 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .log-entry.unlock .log-title{color:#00ff88;}
 .log-entry .log-body{font-size:14px;color:#cc8888;line-height:1.4;}
 @keyframes logIn{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:translateX(0);}}
-
 #achievements-bar{border-top:2px solid var(--border);padding:8px 12px;background:#0a0010;}
 #achievements-bar h3{font-family:'Creepster',cursive;font-size:18px;color:var(--gold);margin-bottom:6px;}
 #ach-list{display:flex;flex-wrap:wrap;gap:6px;}
 .ach-badge{background:#1a0010;border:1px solid #5a0030;border-radius:4px;padding:4px 8px;font-size:14px;color:#cc9999;transition:all .3s;}
 .ach-badge.earned{border-color:var(--gold);color:var(--gold);box-shadow:0 0 8px #ffc20040;}
-
-/* POPUP MODAL */
 #modal{display:none;position:fixed;inset:0;background:#000000cc;z-index:5000;align-items:center;justify-content:center;}
 #modal.show{display:flex;}
 #modal-box{background:#0a0015;border:3px solid var(--border);border-radius:8px;padding:30px;max-width:480px;width:90%;text-align:center;box-shadow:0 0 60px #ff000050;animation:modalIn .3s ease;}
@@ -141,28 +116,14 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 #modal-box p{color:#cc9999;font-size:18px;line-height:1.5;margin-bottom:20px;}
 #modal-box button{background:#3a0000;border:2px solid var(--accent);color:var(--accent);font-family:'Creepster',cursive;font-size:22px;padding:10px 30px;cursor:pointer;border-radius:4px;transition:all .2s;}
 #modal-box button:hover{background:#600000;box-shadow:0 0 20px #ff000060;}
-
-/* FLOATING NUMBERS */
 .float-num{position:fixed;font-family:'Creepster',cursive;font-size:22px;color:var(--gold);pointer-events:none;z-index:8000;animation:floatUp 1s ease forwards;}
 .float-num.red{color:var(--accent);}
 @keyframes floatUp{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-80px);}}
-
-/* SECTION HEADERS */
 .section-header{font-family:'Creepster',cursive;font-size:20px;color:var(--accent);padding:6px 0;margin-bottom:8px;border-bottom:1px solid #3a0020;}
-
-/* Number format */
 .big-num{font-size:26px;color:var(--green);font-family:'VT323',monospace;}
-
-/* Scrollbar global */
 ::-webkit-scrollbar{width:6px;}
 ::-webkit-scrollbar-track{background:#0a0010;}
 ::-webkit-scrollbar-thumb{background:#4a0020;}
-
-/* Glow pulse on clicker */
-@keyframes borderPulse{0%,100%{box-shadow:0 0 30px #ff000040,inset 0 0 40px #1a0005;}50%{box-shadow:0 0 60px #ff000070,inset 0 0 60px #2a0010;}}
-#clicker-btn{animation:borderPulse 3s ease-in-out infinite;}
-
-/* Mobile */
 @media(max-width:900px){
   #game{grid-template-columns:1fr 1fr;grid-template-rows:auto auto;height:auto;}
   #right-panel{grid-column:1/-1;}
@@ -199,32 +160,22 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
   async function verifyAccess() {
     try {
       await signInAnonymously(auth);
-
       const user = auth.currentUser;
       if (!user) throw new Error("No auth user");
-
       const accessSnap = await getDoc(doc(db, "users", user.uid));
-
       if (!accessSnap.exists() || accessSnap.data().hasAccess !== true) {
         localStorage.removeItem("hasAccess");
         localStorage.removeItem("redeemedCode");
         window.location.replace("index.html");
         return;
       }
-
       const redeemedCode = accessSnap.data().redeemedCode;
-      if (!redeemedCode) {
-        window.location.replace("index.html");
-        return;
-      }
-
+      if (!redeemedCode) { window.location.replace("index.html"); return; }
       const codeSnap = await getDoc(doc(db, "codes", redeemedCode));
-
       if (!codeSnap.exists() || codeSnap.data().used !== true) {
         window.location.replace("index.html");
         return;
       }
-
       localStorage.setItem("hasAccess", "true");
       localStorage.setItem("redeemedCode", redeemedCode);
       document.body.style.visibility = "visible";
@@ -238,11 +189,9 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 </script>
 
 <div id="ticker-wrap"><span id="ticker">★ FNAF CLICKER EARLY ACCESS MODE ★ Five Nights at Freddy's Clicker EARLY ACCESS MODE ★ Beware of the animatronics ★ He's watching... ★ The show starts at midnight ★ It's Me... ★ Can you survive? ★ FNAF CLICKER EARLY ACCESS MODE ★</span></div>
-
 <div id="header"><h1>🎪 FNAF <span>CLICKER</span> 🎪 EARLY ACCESS MODE</h1></div>
 
 <div id="game">
-  <!-- LEFT -->
   <div id="left-panel">
     <div id="stats">
       <div class="stat"><span class="label">🪙 FAZ TOKENS:</span><span id="stat-tokens" class="big-num">0</span></div>
@@ -251,25 +200,20 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
       <div class="stat"><span class="label">📊 ALL TIME:</span><span id="stat-total">0</span></div>
       <div class="stat"><span class="label">🖱️ CLICKS:</span><span id="stat-clicks">0</span></div>
     </div>
-
     <div id="phase-title">⭐ Five Nights at Freddy's ⭐</div>
-
     <div id="clicker-area">
       <div id="clicker-btn" onclick="doClick(event)">
         <div class="char-emoji" id="clicker-emoji">🐻</div>
         <div class="char-name" id="clicker-char-name">FREDDY FAZBEAR</div>
       </div>
     </div>
-
     <div id="click-info">Click to collect Faz Tokens!</div>
-
     <div id="progress-bar-wrap">
       <label id="progress-label">Next: Freddy Fazbear's Pizza (10 tokens)</label>
       <div id="progress-bar"><div id="progress-fill" style="width:0%"></div></div>
     </div>
   </div>
 
-  <!-- MIDDLE - SHOP -->
   <div id="middle-panel">
     <div id="shop-tabs">
       <button class="shop-tab active" onclick="switchTab('upgrades')">⬆ Upgrades</button>
@@ -283,7 +227,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
     </div>
   </div>
 
-  <!-- RIGHT - STORY LOG -->
   <div id="right-panel">
     <h2>📼 FNAF CASE FILES</h2>
     <div id="story-log">
@@ -299,14 +242,12 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
   </div>
 </div>
 
-<!-- GOLDEN FREDDY OVERLAY -->
 <div id="golden-freddy-overlay" onclick="dismissGoldenFreddy()">
   <div class="gf-char">👻</div>
   <p>IT'S ME</p>
   <p class="sub">+<span id="gf-bonus"></span> Faz Tokens! (Click to dismiss)</p>
 </div>
 
-<!-- MODAL -->
 <div id="modal" onclick="closeModal()">
   <div id="modal-box" onclick="event.stopPropagation()">
     <span class="modal-emoji" id="modal-emoji">🎪</span>
@@ -317,10 +258,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-//   GAME DATA
-// ═══════════════════════════════════════════════
-
 const BUILDINGS = [
   {id:'pizza1', name:"Freddy Fazbear's Pizza", icon:"🍕", desc:"The original haunted restaurant. Something feels off.", baseCost:15, baseProduction:0.1},
   {id:'office', name:"Security Office", icon:"📹", desc:"Watch the cameras. Keep the power on. Don't let them in.", baseCost:100, baseProduction:0.5},
@@ -335,7 +272,6 @@ const BUILDINGS = [
 ];
 
 const UPGRADES = [
-  // Click upgrades
   {id:'u1', name:"Fazbear Endoskeleton", icon:"🦴", desc:"+1 token per click", cost:10, type:'click', val:1},
   {id:'u2', name:"Bear Claws", icon:"🐾", desc:"+3 tokens per click", cost:50, type:'click', val:3},
   {id:'u3', name:"Freddy's Microphone", icon:"🎤", desc:"×2 tokens per click", cost:200, type:'clickmult', val:2},
@@ -348,45 +284,33 @@ const UPGRADES = [
   {id:'u10', name:"Scooper Device", icon:"🥄", desc:"×10 tokens per click", cost:50000000, type:'clickmult', val:10},
   {id:'u11', name:"Remnant Injection", icon:"💉", desc:"×25 tokens per click", cost:1000000000, type:'clickmult', val:25},
   {id:'u12', name:"Glitchtrap Virus", icon:"🐛", desc:"×50 tokens per click", cost:50000000000, type:'clickmult', val:50},
-  // Building upgrades - pizza1
   {id:'b1u1', name:"Better Animatronics", icon:"🎩", desc:"Freddy Fazbear's Pizza ×2 production", cost:100, type:'building', bid:'pizza1', val:2},
   {id:'b1u2', name:"New Show Stage", icon:"🎭", desc:"Freddy Fazbear's Pizza ×2 production", cost:800, type:'building', bid:'pizza1', val:2},
   {id:'b1u3', name:"Classic Location", icon:"🍕", desc:"Freddy Fazbear's Pizza ×5 production", cost:5000, type:'building', bid:'pizza1', val:5},
-  // Building upgrades - office
   {id:'b2u1', name:"Improved Cameras", icon:"📷", desc:"Security Office ×2 production", cost:500, type:'building', bid:'office', val:2},
   {id:'b2u2', name:"Backup Power", icon:"🔋", desc:"Security Office ×2 production", cost:4000, type:'building', bid:'office', val:2},
   {id:'b2u3', name:"Steel Doors", icon:"🚪", desc:"Security Office ×5 production", cost:30000, type:'building', bid:'office', val:5},
-  // Building upgrades - partservice
   {id:'b3u1', name:"Spare Parts Stockpile", icon:"⚙️", desc:"Parts & Service ×2 production", cost:6000, type:'building', bid:'partservice', val:2},
   {id:'b3u2', name:"Endoskeleton Upgrade", icon:"🤖", desc:"Parts & Service ×3 production", cost:50000, type:'building', bid:'partservice', val:3},
-  // Building upgrades - piratecove
   {id:'b4u1', name:"Torn Curtain", icon:"🎪", desc:"Pirate's Cove ×2 production", cost:60000, type:'building', bid:'piratecove', val:2},
   {id:'b4u2', name:"Foxy Runs Free", icon:"🦊", desc:"Pirate's Cove ×5 production", cost:600000, type:'building', bid:'piratecove', val:5},
-  // Building upgrades - prizecorner
   {id:'b5u1', name:"Music Box Wound", icon:"🎵", desc:"Prize Corner ×2 production", cost:700000, type:'building', bid:'prizecorner', val:2},
   {id:'b5u2', name:"The Puppet Awakens", icon:"🎭", desc:"Prize Corner ×3 production", cost:7000000, type:'building', bid:'prizecorner', val:3},
-  // Building upgrades - sisterloc
   {id:'b6u1', name:"HandUnit Protocols", icon:"🖐️", desc:"Sister Location ×2 production", cost:8000000, type:'building', bid:'sisterloc', val:2},
   {id:'b6u2', name:"Scooper Activated", icon:"🥄", desc:"Sister Location ×5 production", cost:100000000, type:'building', bid:'sisterloc', val:5},
-  // Building upgrades - fright
   {id:'b7u1', name:"Original Suit Found", icon:"🐰", desc:"Fazbear's Fright ×2 production", cost:120000000, type:'building', bid:'fright', val:2},
   {id:'b7u2', name:"Springtrap Loose", icon:"💀", desc:"Fazbear's Fright ×5 production", cost:1500000000, type:'building', bid:'fright', val:5},
-  // bedroom
   {id:'b8u1', name:"Nightlight Installed", icon:"💡", desc:"The Bedroom ×2 production", cost:2000000000, type:'building', bid:'bedroom', val:2},
-  // cbpw
   {id:'b9u1', name:"Baby's Ice Cream", icon:"🍦", desc:"Circus Baby's Pizza World ×2 production", cost:30000000000, type:'building', bid:'cbpw', val:2},
-  // pizzaplex
   {id:'b10u1', name:"Glamrock Band", icon:"🎸", desc:"Mega Pizzaplex ×2 production", cost:400000000000, type:'building', bid:'pizzaplex', val:2},
 ];
 
 const CHARACTERS = [
-  // FNAF 1
   {id:'freddy', name:"Freddy Fazbear", icon:"🐻", game:"FNAF 1", lore:"The face of Fazbear Entertainment. By night, he leads the animatronics on their... rounds.", unlock:0},
   {id:'bonnie', name:"Bonnie", icon:"🎸", game:"FNAF 1", lore:"The purple bunny guitarist. He moves first. You'll notice the empty hallway before you notice him.", unlock:50},
   {id:'chica', name:"Chica", icon:"🐤", game:"FNAF 1", lore:"The yellow chicken who loves pizza. She comes through the kitchen. Listen for the pots.", unlock:100},
   {id:'foxy', name:"Foxy the Pirate", icon:"🦊", game:"FNAF 1", lore:"Retired to Pirate's Cove after an incident. If you don't watch him, he will run.", unlock:200},
   {id:'goldenfreddy', name:"Golden Freddy", icon:"✨", game:"FNAF 1", lore:"An old, withered golden suit. His appearances are unexplained. Some say he is a ghost.", unlock:500},
-  // FNAF 2
   {id:'toyfreddy', name:"Toy Freddy", icon:"🎪", game:"FNAF 2", lore:"The shiny new version of Freddy. Overconfident. Less threatening than the others.", unlock:1000},
   {id:'toybonnie', name:"Toy Bonnie", icon:"🐰", game:"FNAF 2", lore:"Sleek blue guitar rabbit. Moves quickly through the vents.", unlock:1500},
   {id:'toychica', name:"Toy Chica", icon:"🐔", game:"FNAF 2", lore:"The new Chica model. She removes her beak when she leaves the stage. Don't ask why.", unlock:2000},
@@ -396,12 +320,10 @@ const CHARACTERS = [
   {id:'witheredfreddy', name:"Withered Freddy", icon:"💀", game:"FNAF 2", lore:"The original animatronics, damaged and replaced. They were used as parts. Their eyes still move.", unlock:7000},
   {id:'witheredbonnie', name:"Withered Bonnie", icon:"😶", game:"FNAF 2", lore:"His face is gone. Something is missing. Yet he still wanders.", unlock:8000},
   {id:'jj', name:"JJ (Balloon Girl)", icon:"🎀", game:"FNAF 2", lore:"A hidden figure. Never acknowledged by management. She watches from behind the scenes.", unlock:10000},
-  // FNAF 3
   {id:'springtrap', name:"Springtrap", icon:"☠️", game:"FNAF 3", lore:"William Afton, the Purple Guy, became trapped in a Spring Bonnie suit. The suit malfunctioned. He cannot die.", unlock:20000},
   {id:'phantomfreddy', name:"Phantom Freddy", icon:"👁️", game:"FNAF 3", lore:"A hallucination of the old Freddy. He doesn't move. He just watches.", unlock:25000},
   {id:'phantombb', name:"Phantom BB", icon:"💀", game:"FNAF 3", lore:"A burned, charred vision of Balloon Boy. Causes your ventilation to fail.", unlock:30000},
   {id:'phantompuppet', name:"Phantom Marionette", icon:"🖤", game:"FNAF 3", lore:"The Puppet, scorched and broken. Appears in your office when the cameras cut out.", unlock:35000},
-  // FNAF 4
   {id:'nightmarefreddy', name:"Nightmare Freddy", icon:"😱", game:"FNAF 4", lore:"A twisted nightmare vision of Freddy. The Freddles come first, then him.", unlock:50000},
   {id:'nightmarebonnie', name:"Nightmare Bonnie", icon:"🐇", game:"FNAF 4", lore:"Massive. Sharp teeth. Lurks to the left of the bedroom door.", unlock:60000},
   {id:'nightmarechica', name:"Nightmare Chica", icon:"🐣", game:"FNAF 4", lore:"The nightmare Chica hides in the closet. The sounds from the kitchen aren't the house settling.", unlock:70000},
@@ -410,7 +332,6 @@ const CHARACTERS = [
   {id:'nightmare', name:"NIGHTMARE", icon:"🌑", game:"FNAF 4", lore:"Pure shadow. Pure darkness. An entity born from deepest terror. Nothing more.", unlock:120000},
   {id:'plushtrap', name:"Plushtrap", icon:"🧸", game:"FNAF 4", lore:"A small Spring Bonnie plushie that comes to life in a minigame. Cute. Very dangerous.", unlock:130000},
   {id:'nightmarionne', name:"Nightmarionne", icon:"🎪", game:"FNAF 4 DLC", lore:"The Puppet, corrupted into a nightmare. Long black fingers. Empty white eyes.", unlock:150000},
-  // Sister Location
   {id:'circusbaby', name:"Circus Baby", icon:"🤡", game:"Sister Location", lore:"Elizabeth Afton, scooped by Baby and kept inside. She leads the others. She knows more than she says.", unlock:200000},
   {id:'funtimefreddy', name:"Funtime Freddy", icon:"🎠", game:"Sister Location", lore:"He has a hand puppet named Bon-Bon. He loves to perform. He also loves to capture.", unlock:250000},
   {id:'funtimefoxy', name:"Funtime Foxy", icon:"🎀", game:"Sister Location", lore:"Pink and white. Performs in the Funtime Auditorium. You must not let it hear you.", unlock:300000},
@@ -418,17 +339,14 @@ const CHARACTERS = [
   {id:'ennard', name:"Ennard", icon:"🕸️", game:"Sister Location", lore:"The amalgamation. All the Funtime animatronics merged into one, hiding behind a mask. Baby controls it.", unlock:400000},
   {id:'bidybab', name:"Bidybab", icon:"👶", game:"Sister Location", lore:"Small and childlike. They tap on the mini-game door. Don't let them in.", unlock:450000},
   {id:'lolbit', name:"Lolbit", icon:"🦊", game:"Sister Location", lore:"A glitchy Funtime Foxy variant in orange and white. Appears to block your path.", unlock:500000},
-  // FFPS
   {id:'scraptrap', name:"Scraptrap", icon:"🪤", game:"Pizzeria Simulator", lore:"William Afton survives again, in a new rotting rabbit suit. He always comes back.", unlock:700000},
   {id:'scrapbaby', name:"Scrap Baby", icon:"⚙️", game:"Pizzeria Simulator", lore:"Circus Baby, rebuilt from scraps. More dangerous than ever. Still holding scissors.", unlock:800000},
   {id:'moltenfreddy', name:"Molten Freddy", icon:"🔥", game:"Pizzeria Simulator", lore:"Ennard, after casting out Baby's control chip. A writhing mass of wires and parts.", unlock:900000},
   {id:'lefty', name:"Lefty", icon:"🎸", game:"Pizzeria Simulator", lore:"A special animatronic built by Henry Emily to contain the Puppet — his daughter, Charlie.", unlock:1000000},
-  // UCN
   {id:'mrhippo', name:"Mr. Hippo", icon:"🦛", game:"UCN", lore:"A jovial hippo who tells long stories while trying to end you. His tales have no point.", unlock:1500000},
   {id:'happyfrog', name:"Happy Frog", icon:"🐸", game:"UCN", lore:"An exuberant green frog from the Mediocre Melodies. Don't let the happiness fool you.", unlock:1600000},
   {id:'neddBear', name:"Nedd Bear", icon:"🐨", game:"UCN", lore:"A sarcastic bear-like animatronic. 'Figure it out, genius.'", unlock:1700000},
   {id:'helpy', name:"Helpy", icon:"🐻", game:"UCN / FFPS", lore:"The cheerful mascot of Fazbear Entertainment. He tries to help. He often makes things worse.", unlock:2000000},
-  // Security Breach
   {id:'glamrockfreddy', name:"Glamrock Freddy", icon:"🎸", game:"Security Breach", lore:"The star of the Mega Pizzaplex. He protects Gregory. Inside, a remnant of the old Freddy endures.", unlock:3000000},
   {id:'glamrockchica', name:"Glamrock Chica", icon:"🎤", game:"Security Breach", lore:"Glam rock guitarist, corrupted by Vanny's programming. She searches the food court.", unlock:3500000},
   {id:'roxannewolf', name:"Roxanne Wolf", icon:"🐺", game:"Security Breach", lore:"'I'm the best!' A vain green wolf who patrols the racetrack. Her eyes are enhanced.", unlock:4000000},
@@ -436,7 +354,6 @@ const CHARACTERS = [
   {id:'djmusicman', name:"DJ Music Man", icon:"🎵", game:"Security Breach", lore:"A colossal DJ spider. Massive. Fills the entire atrium. The ground shakes when he moves.", unlock:5000000},
   {id:'vanny', name:"Vanny", icon:"🐰", game:"Security Breach", lore:"The white rabbit. Vanessa under Glitchtrap's control. She hunts Gregory throughout the Pizzaplex.", unlock:6000000},
   {id:'gregory', name:"Gregory", icon:"👦", game:"Security Breach", lore:"The child who hides inside Glamrock Freddy. He knows things he shouldn't. He came in before closing.", unlock:7000000},
-  // Special
   {id:'williamafton', name:"William Afton", icon:"🟣", game:"All Games", lore:"THE PURPLE GUY. The killer behind everything. He murdered the Missing Children. He always comes back. 'I always come back.'", unlock:8000000},
   {id:'henryemily', name:"Henry Emily", icon:"🔑", game:"FFPS / SL", lore:"William's old business partner. Father of Charlie (The Puppet). He built the Pizzeria as a trap — and burned it down.", unlock:9000000},
   {id:'phoneguy', name:"Phone Guy", icon:"📞", game:"FNAF 1-2", lore:"He left you the training tapes. He was a security guard before you. He didn't make it to night 4.", unlock:10000000},
@@ -493,33 +410,25 @@ const PHASES = [
   {threshold:1000000000, char:"🟣", name:"WILLIAM AFTON", title:"☠️ I ALWAYS COME BACK"},
 ];
 
-// ═══════════════════════════════════════════════
-//   GAME STATE
-// ═══════════════════════════════════════════════
 const game = {
-  tokens: 0,
-  totalTokens: 0,
-  tokensPerClick: 1,
-  tokensPerSecond: 0,
-  clickCount: 0,
-  goldenCount: 0,
-  unlockedChars: new Set(),
-  completedMilestones: new Set(),
-  earnedAchs: new Set(),
+  tokens: 0, totalTokens: 0, tokensPerClick: 1, tokensPerSecond: 0,
+  clickCount: 0, goldenCount: 0,
+  unlockedChars: new Set(), completedMilestones: new Set(), earnedAchs: new Set(),
   buildings: BUILDINGS.map(b => ({...b, count:0, mult:1})),
   upgrades: UPGRADES.map(u => ({...u, bought:false})),
   currentPhase: 0,
 };
 
-// ═══════════════════════════════════════════════
-//   HELPERS
-// ═══════════════════════════════════════════════
+// FIX: show decimals for small numbers instead of rounding to 0
 function fmt(n) {
+  if (n === 0) return "0";
+  if (n < 0.01) return n.toFixed(4);
+  if (n < 10) return n.toFixed(2);
   if (n >= 1e12) return (n/1e12).toFixed(2) + 'T';
   if (n >= 1e9) return (n/1e9).toFixed(2) + 'B';
   if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
   if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
-  return Math.floor(n).toString();
+  return Math.round(n).toString();
 }
 
 function getBuildingCost(b) {
@@ -527,21 +436,16 @@ function getBuildingCost(b) {
 }
 
 function recalc() {
-  // clicks
-  let tpc = 1;
-  let mult = 1;
+  let tpc = 1, mult = 1;
   for (const u of game.upgrades) {
     if (!u.bought) continue;
     if (u.type === 'click') tpc += u.val;
     if (u.type === 'clickmult') mult *= u.val;
   }
   game.tokensPerClick = tpc * mult;
-
-  // tps
   let tps = 0;
   for (const b of game.buildings) {
     let bprod = b.baseProduction;
-    // apply building upgrades
     for (const u of game.upgrades) {
       if (!u.bought) continue;
       if (u.type === 'building' && u.bid === b.id) bprod *= u.val;
@@ -551,18 +455,12 @@ function recalc() {
   game.tokensPerSecond = tps;
 }
 
-// ═══════════════════════════════════════════════
-//   CLICK
-// ═══════════════════════════════════════════════
 function doClick(e) {
   game.tokens += game.tokensPerClick;
   game.totalTokens += game.tokensPerClick;
   game.clickCount++;
   spawnFloat(e.clientX, e.clientY, '+' + fmt(game.tokensPerClick));
-
-  // 1% Golden Freddy
   if (Math.random() < 0.01) triggerGoldenFreddy();
-
   checkAll();
   renderStats();
 }
@@ -577,9 +475,6 @@ function spawnFloat(x, y, text, red=false) {
   setTimeout(() => el.remove(), 1000);
 }
 
-// ═══════════════════════════════════════════════
-//   GOLDEN FREDDY
-// ═══════════════════════════════════════════════
 function triggerGoldenFreddy() {
   game.goldenCount++;
   const bonus = Math.floor(game.tokensPerClick * 777);
@@ -597,9 +492,6 @@ function dismissGoldenFreddy() {
   renderStats();
 }
 
-// ═══════════════════════════════════════════════
-//   BUY BUILDING
-// ═══════════════════════════════════════════════
 function buyBuilding(id) {
   const b = game.buildings.find(x => x.id === id);
   const cost = getBuildingCost(b);
@@ -626,17 +518,11 @@ function buyUpgrade(id) {
   addLog("⬆ Upgrade: " + u.name, u.desc, 'unlock');
 }
 
-// ═══════════════════════════════════════════════
-//   MODAL
-// ═══════════════════════════════════════════════
-let _modalQueue = [];
-let _modalOpen = false;
-
+let _modalQueue = [], _modalOpen = false;
 function showModal(emoji, title, body) {
   _modalQueue.push({emoji, title, body});
   if (!_modalOpen) popModal();
 }
-
 function popModal() {
   if (_modalQueue.length === 0) { _modalOpen = false; return; }
   _modalOpen = true;
@@ -646,16 +532,12 @@ function popModal() {
   document.getElementById('modal-body').textContent = m.body;
   document.getElementById('modal').classList.add('show');
 }
-
 function closeModal() {
   document.getElementById('modal').classList.remove('show');
   _modalOpen = false;
   setTimeout(popModal, 300);
 }
 
-// ═══════════════════════════════════════════════
-//   LOG
-// ═══════════════════════════════════════════════
 function addLog(title, body, type='') {
   const log = document.getElementById('story-log');
   const el = document.createElement('div');
@@ -664,11 +546,7 @@ function addLog(title, body, type='') {
   log.insertBefore(el, log.firstChild);
 }
 
-// ═══════════════════════════════════════════════
-//   CHECK ALL (milestones, chars, achs, phase)
-// ═══════════════════════════════════════════════
 function checkAll() {
-  // Lore milestones
   for (const evt of LORE_EVENTS) {
     if (game.totalTokens >= evt.threshold && !game.completedMilestones.has(evt.title)) {
       game.completedMilestones.add(evt.title);
@@ -676,7 +554,6 @@ function checkAll() {
       showModal(evt.emoji, evt.title, evt.body);
     }
   }
-  // Characters
   for (const ch of CHARACTERS) {
     if (game.totalTokens >= ch.unlock && !game.unlockedChars.has(ch.id)) {
       game.unlockedChars.add(ch.id);
@@ -684,7 +561,6 @@ function checkAll() {
       renderChars();
     }
   }
-  // Achievements
   for (const ach of ACHIEVEMENTS) {
     if (!game.earnedAchs.has(ach.id) && ach.check(game)) {
       game.earnedAchs.add(ach.id);
@@ -692,7 +568,6 @@ function checkAll() {
       renderAchs();
     }
   }
-  // Phase
   let newPhase = 0;
   for (let i = 0; i < PHASES.length; i++) {
     if (game.totalTokens >= PHASES[i].threshold) newPhase = i;
@@ -705,17 +580,12 @@ function checkAll() {
   }
 }
 
-// ═══════════════════════════════════════════════
-//   RENDER STATS
-// ═══════════════════════════════════════════════
 function renderStats() {
   document.getElementById('stat-tokens').textContent = fmt(game.tokens);
   document.getElementById('stat-tps').textContent = fmt(game.tokensPerSecond) + '/s';
   document.getElementById('stat-tpc').textContent = fmt(game.tokensPerClick);
   document.getElementById('stat-total').textContent = fmt(game.totalTokens);
   document.getElementById('stat-clicks').textContent = fmt(game.clickCount);
-
-  // Progress bar - next milestone
   let next = LORE_EVENTS.find(e => game.totalTokens < e.threshold);
   if (next) {
     let prev = 0;
@@ -730,15 +600,11 @@ function renderStats() {
   }
 }
 
-// ═══════════════════════════════════════════════
-//   RENDER UPGRADES
-// ═══════════════════════════════════════════════
 function renderUpgrades() {
   const el = document.getElementById('tab-upgrades');
   el.innerHTML = '<div class="section-header">🔬 UPGRADES</div>';
   for (const u of game.upgrades) {
     const affordable = game.tokens >= u.cost;
-    const cls = u.bought ? 'bought' : affordable ? 'upgrade-item affordable' : 'upgrade-item';
     const div = document.createElement('div');
     div.className = 'upgrade-item ' + (u.bought ? 'bought' : affordable ? 'affordable' : '');
     div.innerHTML = `
@@ -753,9 +619,6 @@ function renderUpgrades() {
   }
 }
 
-// ═══════════════════════════════════════════════
-//   RENDER BUILDINGS
-// ═══════════════════════════════════════════════
 function renderBuildings() {
   const el = document.getElementById('tab-buildings');
   el.innerHTML = '<div class="section-header">🏚 LOCATIONS</div>';
@@ -765,7 +628,6 @@ function renderBuildings() {
     const div = document.createElement('div');
     div.className = 'building-item' + (affordable ? ' affordable' : '');
     let prodPerSec = b.baseProduction;
-    // apply upgrades
     for (const u of game.upgrades) {
       if (u.bought && u.type === 'building' && u.bid === b.id) prodPerSec *= u.val;
     }
@@ -787,9 +649,6 @@ function renderBuildings() {
   }
 }
 
-// ═══════════════════════════════════════════════
-//   RENDER CHARS
-// ═══════════════════════════════════════════════
 function renderChars() {
   const el = document.getElementById('tab-characters');
   el.innerHTML = `<div class="section-header">👾 CHARACTERS — ${game.unlockedChars.size}/${CHARACTERS.length}</div>`;
@@ -809,19 +668,14 @@ function renderChars() {
   el.appendChild(grid);
 }
 
-// ═══════════════════════════════════════════════
-//   RENDER ACHIEVEMENTS
-// ═══════════════════════════════════════════════
 function renderAchs() {
   const el = document.getElementById('ach-list');
   el.innerHTML = '';
   for (const ach of ACHIEVEMENTS) {
-    const earned = game.earnedAchs.has(ach.id);
-    if (!earned) continue;
+    if (!game.earnedAchs.has(ach.id)) continue;
     const b = document.createElement('div');
     b.className = 'ach-badge earned';
     b.textContent = ach.emoji + ' ' + ach.name;
-    b.title = ach.name;
     el.appendChild(b);
   }
   if (el.children.length === 0) {
@@ -829,9 +683,6 @@ function renderAchs() {
   }
 }
 
-// ═══════════════════════════════════════════════
-//   TABS
-// ═══════════════════════════════════════════════
 let currentTab = 'upgrades';
 function switchTab(tab) {
   document.querySelectorAll('.shop-tab').forEach(t => t.classList.remove('active'));
@@ -845,36 +696,25 @@ function switchTab(tab) {
   if (tab === 'upgrades') renderUpgrades();
 }
 
-// ═══════════════════════════════════════════════
-//   GAME LOOP
-// ═══════════════════════════════════════════════
 let lastTime = Date.now();
 setInterval(() => {
   const now = Date.now();
   const dt = (now - lastTime) / 1000;
   lastTime = now;
   const earned = game.tokensPerSecond * dt;
-  if (earned > 0) {
-    game.tokens += earned;
-    game.totalTokens += earned;
-  }
+  if (earned > 0) { game.tokens += earned; game.totalTokens += earned; }
   renderStats();
   checkAll();
-  // Refresh current tab display
   if (currentTab === 'upgrades') renderUpgrades();
   else if (currentTab === 'buildings') renderBuildings();
 }, 200);
 
-// ═══════════════════════════════════════════════
-//   INIT
-// ═══════════════════════════════════════════════
 recalc();
 renderStats();
 renderUpgrades();
 renderBuildings();
 renderChars();
 renderAchs();
-// Unlock Freddy immediately
 game.unlockedChars.add('freddy');
 renderChars();
 </script>
