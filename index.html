@@ -1,27 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Code Access</title>
+  <title>Early Access Code</title>
 </head>
 <body>
   <h1>Enter Access Code</h1>
 
   <input id="codeInput" placeholder="Enter code">
   <button id="btn">Submit</button>
-  <button id="resetBtn">Reset Access DANGEROUS!!!!!!!!!</button>
+  <button id="resetBtn">Reset Access</button>
 
   <p id="status"></p>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-  getFirestore,
-  collection,
-  getDocs,
-  doc,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBg9nC74B16acZNHLOZpNHwj2YPYDL2clU",
@@ -32,86 +25,73 @@
       appId: "1:602773525803:web:fc719630af298aeaa6a16e"
     };
 
-const resetBtn = document.getElementById("resetBtn");
-    
-resetBtn.addEventListener("click", () => {
-  localStorage.removeItem("hasAccess");
-  localStorage.removeItem("redeemedCode");
-  statusText.innerText = "Local access cleared. Enter a new code.";
-});
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app);
 
     const statusText = document.getElementById("status");
     const btn = document.getElementById("btn");
+    const resetBtn = document.getElementById("resetBtn");
 
-    async function login() {
-      await signInAnonymously(auth);
+    resetBtn.addEventListener("click", () => {
+      localStorage.removeItem("hasAccess");
+      localStorage.removeItem("redeemedHash");
+      statusText.innerText = "Access reset. Enter a code.";
+    });
+
+    async function hashCode(code) {
+      const enc = new TextEncoder();
+      const data = enc.encode(code);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
     }
 
-async function hashCode(code) {
-  const enc = new TextEncoder();
-  const data = enc.encode(code);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-}
+    async function redeemCode() {
+      const code = document.getElementById("codeInput").value.trim();
 
-async function redeemCode() {
-  const code = document.getElementById("codeInput").value.trim();
+      if (!code) {
+        statusText.innerText = "Enter a code.";
+        return;
+      }
 
-  if (!code) {
-    statusText.innerText = "Enter a code.";
-    return;
-  }
+      statusText.innerText = "Hashing code...";
+      const hashed = await hashCode(code);
 
-  statusText.innerText = "Checking...";
+      statusText.innerText = "Checking code...";
+      const codeRef = doc(db, "codes", hashed);
+      const snap = await getDoc(codeRef);
 
-  const hashed = await hashCode(code);
+      if (!snap.exists()) {
+        statusText.innerText = "Invalid code.";
+        return;
+      }
 
-  const snapshot = await getDocs(collection(db, "codes"));
+      const data = snap.data();
 
-  let matchDoc = null;
+      if (data.used === true) {
+        statusText.innerText = "Code already used.";
+        return;
+      }
 
-  snapshot.forEach(docSnap => {
-    const data = docSnap.data();
-    if (data.hash === hashed) {
-      matchDoc = { id: docSnap.id, data };
+      statusText.innerText = "Redeeming...";
+      await updateDoc(codeRef, {
+        used: true,
+        usedAt: serverTimestamp()
+      });
+
+      localStorage.setItem("hasAccess", "true");
+      localStorage.setItem("redeemedHash", hashed);
+
+      statusText.innerText = "Success! Redirecting...";
+      setTimeout(() => {
+        window.location.href = "fnafclicker.html";
+      }, 500);
     }
-  });
-
-  if (!matchDoc) {
-    statusText.innerText = "Invalid code.";
-    return;
-  }
-
-  if (matchDoc.data.used) {
-    statusText.innerText = "Code already used.";
-    return;
-  }
-
-  await updateDoc(doc(db, "codes", matchDoc.id), {
-    used: true
-  });
-
-  localStorage.setItem("hasAccess", "true");
-  localStorage.setItem("redeemedCode", code);
-  window.location.href = "fnafclicker.html";
-
-  statusText.innerText = "Success! Redirecting...";
-
-  setTimeout(() => {
-    window.location.href = "fnafclicker.html";
-  }, 800);
-}
 
     btn.addEventListener("click", redeemCode);
 
-    await login();
-
-    if (localStorage.getItem("hasAccess") === "true") {
+    // If already redeemed, just go
+    if (localStorage.getItem("hasAccess") === "true" && localStorage.getItem("redeemedHash")) {
       window.location.href = "fnafclicker.html";
     }
   </script>
