@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SHA-256 Hasher</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: rgba(255, 255, 255, 0.06);
+      --panel-strong: rgba(255, 255, 255, 0.1);
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #e8eefc;
+      --muted: #9aa7c7;
+      --accent: #7c9cff;
+      --accent-2: #8b5cf6;
+      --good: #34d399;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(124, 156, 255, 0.25), transparent 30%),
+        radial-gradient(circle at top right, rgba(139, 92, 246, 0.22), transparent 28%),
+        linear-gradient(180deg, #070b16, #0b1020 55%, #080c18);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .wrap {
+      width: min(920px, 100%);
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      letter-spacing: 0.02em;
+    }
+
+    .hero p {
+      margin: 10px auto 0;
+      max-width: 700px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 1rem;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      overflow: hidden;
+    }
+
+    .card-top {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(90deg, rgba(124, 156, 255, 0.14), rgba(139, 92, 246, 0.1));
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 20px;
+    }
+
+    .field label {
+      display: block;
+      font-weight: 700;
+      margin: 0 0 8px;
+      color: #d8e2ff;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      resize: vertical;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(5, 10, 22, 0.72);
+      color: var(--text);
+      padding: 16px 16px;
+      font: inherit;
+      line-height: 1.5;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    textarea:focus {
+      border-color: rgba(124, 156, 255, 0.75);
+      box-shadow: 0 0 0 4px rgba(124, 156, 255, 0.12);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .primary {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 10px 25px rgba(124, 156, 255, 0.18);
+    }
+
+    .secondary {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    .output {
+      border: 1px solid var(--border);
+      background: rgba(5, 10, 22, 0.62);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .output .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .output .title {
+      font-weight: 800;
+    }
+
+    code {
+      display: block;
+      width: 100%;
+      word-break: break-all;
+      white-space: pre-wrap;
+      color: #d8e2ff;
+      line-height: 1.6;
+      font-size: 0.96rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 14px;
+      min-height: 92px;
+    }
+
+    .status {
+      margin-top: 12px;
+      color: var(--muted);
+      min-height: 1.4em;
+    }
+
+    .status.good { color: var(--good); }
+
+    .footer {
+      margin-top: 14px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    @media (min-width: 860px) {
+      .grid {
+        grid-template-columns: 1.1fr 0.9fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>SHA-256 Hasher</h1>
+      <p>Type a code, generate its SHA-256 hash, and copy the result for Firestore. This uses the same browser-based <code>crypto.subtle.digest()</code> method as the console version.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="badge">🔒 Browser hashing only</div>
+        <div class="badge">⚡ SHA-256</div>
+        <div class="badge">📋 Copy-ready output</div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="inputText">Input text</label>
+          <textarea id="inputText" placeholder="Example: FNAF1234"></textarea>
+
+          <div class="actions">
+            <button class="primary" id="hashBtn">Generate Hash</button>
+            <button class="secondary" id="copyInputBtn">Copy Input</button>
+            <button class="secondary" id="clearBtn">Clear</button>
+          </div>
+
+          <div class="status" id="status">Ready.</div>
+        </div>
+
+        <div class="output">
+          <div class="row">
+            <div class="title">SHA-256 Output</div>
+            <button class="secondary" id="copyHashBtn">Copy Hash</button>
+          </div>
+          <code id="hashOutput">—</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Tip: same input always produces the same hash. Even one different character gives a totally different result.
+    </div>
+  </div>
+
+  <script>
+    const inputText = document.getElementById('inputText');
+    const hashOutput = document.getElementById('hashOutput');
+    const statusEl = document.getElementById('status');
+    const hashBtn = document.getElementById('hashBtn');
+    const copyHashBtn = document.getElementById('copyHashBtn');
+    const copyInputBtn = document.getElementById('copyInputBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    async function hashCode(code) {
+      const enc = new TextEncoder();
+      const data = enc.encode(code);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function generateHash() {
+      const text = inputText.value;
+      if (!text.trim()) {
+        hashOutput.textContent = '—';
+        statusEl.textContent = 'Type something first.';
+        statusEl.className = 'status';
+        return;
+      }
+
+      statusEl.textContent = 'Hashing...';
+      statusEl.className = 'status';
+      try {
+        const hashed = await hashCode(text);
+        hashOutput.textContent = hashed;
+        statusEl.textContent = 'Hash generated successfully.';
+        statusEl.className = 'status good';
+      } catch (err) {
+        hashOutput.textContent = '—';
+        statusEl.textContent = 'Could not generate hash in this browser.';
+        statusEl.className = 'status';
+        console.error(err);
+      }
+    }
+
+    async function copyText(text, label) {
+      try {
+        await navigator.clipboard.writeText(text);
+        statusEl.textContent = `${label} copied.`;
+        statusEl.className = 'status good';
+      } catch {
+        statusEl.textContent = 'Copy failed. Your browser may block clipboard access.';
+        statusEl.className = 'status';
+      }
+    }
+
+    hashBtn.addEventListener('click', generateHash);
+    copyHashBtn.addEventListener('click', () => {
+      if (hashOutput.textContent && hashOutput.textContent !== '—') {
+        copyText(hashOutput.textContent, 'Hash');
+      }
+    });
+    copyInputBtn.addEventListener('click', () => copyText(inputText.value, 'Input'));
+    clearBtn.addEventListener('click', () => {
+      inputText.value = '';
+      hashOutput.textContent = '—';
+      statusEl.textContent = 'Cleared.';
+      statusEl.className = 'status';
+      inputText.focus();
+    });
+
+    inputText.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') generateHash();
+    });
+  </script>
+</body>
+</html>
