@@ -141,8 +141,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBg9nC74B16acZNHLOZpNHwj2YPYDL2clU",
@@ -155,12 +154,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
 
-/* ---------------- UI GUARD ---------------- */
 function showBlocked(reason) {
   document.body.style.visibility = "visible";
-
   document.body.innerHTML = `
     <div style="
       position:fixed;inset:0;
@@ -176,7 +172,6 @@ function showBlocked(reason) {
       gap:12px;
     ">
       <h1>ACCESS BLOCKED</h1>
-
       <p style="max-width:500px;">${reason}</p>
 
       <button id="resetBtn" style="
@@ -192,85 +187,66 @@ function showBlocked(reason) {
       </button>
 
       <p style="opacity:0.6;font-size:12px;margin-top:10px;">
-        This will clear saved code data and return you to the redeem screen.
+        Clears your saved code and returns to the redeem page.
       </p>
     </div>
   `;
 
-  document.getElementById("resetBtn").onclick = async () => {
-    try {
-      localStorage.removeItem("hasAccess");
-      localStorage.removeItem("redeemedCode");
-
-      // optional but recommended if you're using Firebase Auth
-      if (auth?.currentUser) {
-        await auth.signOut();
-      }
-
-      window.location.replace("index.html");
-    } catch (e) {
-      console.error(e);
-      window.location.reload();
-    }
+  document.getElementById("resetBtn").onclick = () => {
+    localStorage.removeItem("hasAccess");
+    localStorage.removeItem("redeemedCode");
+    window.location.replace("index.html");
   };
 }
 
-/* ---------------- MAIN CHECK ---------------- */
+async function hashCode(code) {
+  const enc = new TextEncoder();
+  const data = enc.encode(code);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 async function verifyAccess() {
+  document.body.style.visibility = "hidden";
+
+  const savedCode = localStorage.getItem("redeemedCode");
+
+  if (!savedCode) {
+    showBlocked("No redeemed code saved. Go redeem a code first.");
+    return;
+  }
+
   try {
-    document.body.style.visibility = "hidden";
+    const hashed = await hashCode(savedCode);
 
-    await signInAnonymously(auth);
-    const user = auth.currentUser;
+    const snapshot = await getDocs(collection(db, "codes"));
 
-    if (!user) {
-      showBlocked("Auth failed (no user session).");
+    let match = null;
+
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      if (data.hash === hashed) {
+        match = data;
+      }
+    });
+
+    if (!match) {
+      showBlocked("Saved code is not valid anymore.");
       return;
     }
 
-    const accessRef = doc(db, "users", user.uid);
-    const accessSnap = await getDoc(accessRef);
-
-    if (!accessSnap.exists()) {
-      showBlocked("No access record found for this account.");
+    if (match.used !== true) {
+      showBlocked("Your code is not marked as used.");
       return;
     }
 
-    const data = accessSnap.data();
-
-    if (data.hasAccess !== true) {
-      showBlocked("You do not have early access.");
-      return;
-    }
-
-    const redeemedCode = data.redeemedCode;
-
-    if (!redeemedCode) {
-      showBlocked("No redeemed code linked to this account.");
-      return;
-    }
-
-    const codeSnap = await getDoc(doc(db, "codes", redeemedCode));
-
-    if (!codeSnap.exists()) {
-      showBlocked("Redeemed code no longer exists.");
-      return;
-    }
-
-    if (codeSnap.data().used !== true) {
-      showBlocked("This code is not marked as used.");
-      return;
-    }
-
-    // SUCCESS
     localStorage.setItem("hasAccess", "true");
-    localStorage.setItem("redeemedCode", redeemedCode);
-
     document.body.style.visibility = "visible";
 
   } catch (err) {
-    console.error("Access check failed:", err);
-    showBlocked("System error while verifying access.");
+    console.error(err);
+    showBlocked("Error verifying access. Check console.");
   }
 }
 
