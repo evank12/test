@@ -141,7 +141,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBg9nC74B16acZNHLOZpNHwj2YPYDL2clU",
@@ -155,7 +155,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-function showBlocked(reason) {
+function block(msg) {
   document.body.style.visibility = "visible";
   document.body.innerHTML = `
     <div style="
@@ -172,8 +172,7 @@ function showBlocked(reason) {
       gap:12px;
     ">
       <h1>ACCESS BLOCKED</h1>
-      <p style="max-width:500px;">${reason}</p>
-
+      <p style="max-width:500px;">${msg}</p>
       <button id="resetBtn" style="
         margin-top:15px;
         padding:10px 18px;
@@ -182,71 +181,44 @@ function showBlocked(reason) {
         color:#ff3b3b;
         cursor:pointer;
         font-family:monospace;
-      ">
-        RESET ACCESS
-      </button>
-
-      <p style="opacity:0.6;font-size:12px;margin-top:10px;">
-        Clears your saved code and returns to the redeem page.
-      </p>
+      ">RESET ACCESS</button>
     </div>
   `;
 
   document.getElementById("resetBtn").onclick = () => {
     localStorage.removeItem("hasAccess");
-    localStorage.removeItem("redeemedCode");
+    localStorage.removeItem("redeemedHash");
     window.location.replace("index.html");
   };
 }
 
-async function hashCode(code) {
-  const enc = new TextEncoder();
-  const data = enc.encode(code);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
 async function verifyAccess() {
-  document.body.style.visibility = "hidden";
+  const redeemedHash = localStorage.getItem("redeemedHash");
 
-  const savedCode = localStorage.getItem("redeemedCode");
-
-  if (!savedCode) {
-    showBlocked("No redeemed code saved. Go redeem a code first.");
+  if (!redeemedHash) {
+    block("No redeemed code saved. Go redeem a code first.");
     return;
   }
 
   try {
-    const hashed = await hashCode(savedCode);
+    const snap = await getDoc(doc(db, "codes", redeemedHash));
 
-    const snapshot = await getDocs(collection(db, "codes"));
-
-    let match = null;
-
-    snapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      if (data.hash === hashed) {
-        match = data;
-      }
-    });
-
-    if (!match) {
-      showBlocked("Saved code is not valid anymore.");
+    if (!snap.exists()) {
+      block("Your access code does not exist anymore.");
       return;
     }
 
-    if (match.used !== true) {
-      showBlocked("Your code is not marked as used.");
+    const data = snap.data();
+
+    if (data.used !== true) {
+      block("Your code is not marked as used.");
       return;
     }
 
-    localStorage.setItem("hasAccess", "true");
     document.body.style.visibility = "visible";
-
   } catch (err) {
     console.error(err);
-    showBlocked("Error verifying access. Check console.");
+    block("Error verifying access. Check console.");
   }
 }
 
