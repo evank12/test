@@ -456,6 +456,103 @@ const game = {
   currentPhase: 0,
 };
 
+const SAVE_KEY = "fnafclicker_progress_v1";
+let saveTimer = null;
+
+function saveGameNow() {
+  try {
+    const data = {
+      tokens: game.tokens,
+      totalTokens: game.totalTokens,
+      clickCount: game.clickCount,
+      goldenCount: game.goldenCount,
+      currentPhase: game.currentPhase,
+      unlockedChars: [...game.unlockedChars],
+      completedMilestones: [...game.completedMilestones],
+      earnedAchs: [...game.earnedAchs],
+      buildings: game.buildings.map(b => ({
+        id: b.id,
+        count: b.count,
+        mult: b.mult
+      })),
+      upgrades: game.upgrades.map(u => ({
+        id: u.id,
+        bought: u.bought
+      }))
+    };
+
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  } catch (err) {
+    console.warn("Save failed:", err);
+  }
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveGameNow, 300);
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+
+    const data = JSON.parse(raw);
+
+    game.tokens = Number(data.tokens) || 0;
+    game.totalTokens = Number(data.totalTokens) || 0;
+    game.clickCount = Number(data.clickCount) || 0;
+    game.goldenCount = Number(data.goldenCount) || 0;
+    game.currentPhase = Number(data.currentPhase) || 0;
+
+    game.unlockedChars = new Set(Array.isArray(data.unlockedChars) ? data.unlockedChars : []);
+    game.completedMilestones = new Set(Array.isArray(data.completedMilestones) ? data.completedMilestones : []);
+    game.earnedAchs = new Set(Array.isArray(data.earnedAchs) ? data.earnedAchs : []);
+
+    if (Array.isArray(data.buildings)) {
+      for (const saved of data.buildings) {
+        const b = game.buildings.find(x => x.id === saved.id);
+        if (b) {
+          b.count = Number(saved.count) || 0;
+          b.mult = Number(saved.mult) || 1;
+        }
+      }
+    }
+
+    if (Array.isArray(data.upgrades)) {
+      for (const saved of data.upgrades) {
+        const u = game.upgrades.find(x => x.id === saved.id);
+        if (u) u.bought = !!saved.bought;
+      }
+    }
+
+    return true;
+  } catch (err) {
+    console.warn("Load failed:", err);
+    return false;
+  }
+}
+
+function syncDerivedState() {
+  for (const evt of LORE_EVENTS) {
+    if (game.totalTokens >= evt.threshold) game.completedMilestones.add(evt.title);
+  }
+  for (const ch of CHARACTERS) {
+    if (game.totalTokens >= ch.unlock) game.unlockedChars.add(ch.id);
+  }
+  for (const ach of ACHIEVEMENTS) {
+    if (ach.check(game)) game.earnedAchs.add(ach.id);
+  }
+
+  let newPhase = 0;
+  for (let i = 0; i < PHASES.length; i++) {
+    if (game.totalTokens >= PHASES[i].threshold) newPhase = i;
+  }
+  game.currentPhase = newPhase;
+}
+
+window.addEventListener("beforeunload", saveGameNow);
+  
 // FIX: show decimals for small numbers instead of rounding to 0
 function fmt(n) {
   if (n === 0) return "0";
@@ -500,6 +597,7 @@ function doClick(e) {
   if (Math.random() < 0.01) triggerGoldenFreddy();
   checkAll();
   renderStats();
+  scheduleSave();
 }
 
 function spawnFloat(x, y, text, red=false) {
@@ -527,6 +625,7 @@ function dismissGoldenFreddy() {
   addLog("✨ Golden Freddy appeared!", `You collected ${fmt(window._gfBonus)} Faz Tokens from the golden apparition.`, 'lore');
   checkAll();
   renderStats();
+  scheduleSave();
 }
 
 function buyBuilding(id) {
@@ -540,6 +639,7 @@ function buyBuilding(id) {
   renderStats();
   renderBuildings();
   renderUpgrades();
+  scheduleSave();
 }
 
 function buyUpgrade(id) {
@@ -553,6 +653,7 @@ function buyUpgrade(id) {
   renderUpgrades();
   renderBuildings();
   addLog("⬆ Upgrade: " + u.name, u.desc, 'unlock');
+  scheduleSave();
 }
 
 let _modalQueue = [], _modalOpen = false;
@@ -739,21 +840,36 @@ setInterval(() => {
   const dt = (now - lastTime) / 1000;
   lastTime = now;
   const earned = game.tokensPerSecond * dt;
-  if (earned > 0) { game.tokens += earned; game.totalTokens += earned; }
+if (earned > 0) {
+  game.tokens += earned;
+  game.totalTokens += earned;
+  scheduleSave();
+}
   renderStats();
   checkAll();
   if (currentTab === 'upgrades') renderUpgrades();
   else if (currentTab === 'buildings') renderBuildings();
 }, 200);
 
+loadGame();
 recalc();
+syncDerivedState();
+
 renderStats();
 renderUpgrades();
 renderBuildings();
 renderChars();
 renderAchs();
+
+document.getElementById('clicker-emoji').textContent = PHASES[game.currentPhase].char;
+document.getElementById('clicker-char-name').textContent = PHASES[game.currentPhase].name;
+document.getElementById('phase-title').textContent = PHASES[game.currentPhase].title;
+
 game.unlockedChars.add('freddy');
 renderChars();
+
+document.body.style.visibility = "visible";
+saveGameNow();
 </script>
 </body>
 </html>
