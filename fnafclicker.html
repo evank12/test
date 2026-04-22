@@ -553,7 +553,6 @@ function syncDerivedState() {
 
 window.addEventListener("beforeunload", saveGameNow);
   
-// FIX: show decimals for small numbers instead of rounding to 0
 function fmt(n) {
   if (n === 0) return "0";
   if (n < 0.01) return n.toFixed(4);
